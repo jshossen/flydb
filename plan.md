@@ -31,13 +31,13 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
 ## Phase 3 – Column Management (Weeks 5-6)
 - [x] Week 5: Column visibility
   - [x] Column selector UI (show/hide + reset)
-  - [ ] Persist preferences per table
-- [ ] Week 5-6: Reordering
-  - [ ] Drag-and-drop column headers
-  - [ ] Persist custom order
-- [ ] Week 6: Resizing
-  - [ ] Resizable headers with double-click auto-fit
-  - [ ] Save column widths per table
+  - [x] Persist preferences per table
+- [x] Week 5-6: Reordering
+  - [x] Drag-and-drop column headers
+  - [x] Persist custom order
+- [x] Week 6: Resizing
+  - [x] Resizable headers with double-click auto-fit
+  - [x] Save column widths per table
 
 ## Phase 4 – Export Enhancements (Weeks 7-8)
 - [x] Week 7: Multiple export formats

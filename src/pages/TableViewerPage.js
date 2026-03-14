@@ -443,6 +443,7 @@ const TableViewerPage = () => {
                         sortColumn={sortColumn}
                         sortOrder={sortOrder}
                         highlightQuery={searchQuery}
+                        tableName={tableName}
                     />
                 </CardBody>
             </Card>
