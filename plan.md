@@ -24,9 +24,9 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
   - [x] Display relationship badges/counts on table list
   - [x] Show relationship panel inside table viewer with quick navigation
   - [ ] (Optional) Render relationship graph/diagram
-- [ ] Week 4: Related data preview
-  - [ ] Expandable related-record previews
-  - [ ] One-click navigation with pre-applied filters
+- [x] Week 4: Related data preview
+  - [x] Expandable related-record previews
+  - [x] One-click navigation with pre-applied filters
 
 ## Phase 3 – Column Management (Weeks 5-6)
 - [x] Week 5: Column visibility
