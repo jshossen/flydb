@@ -1,15 +1,16 @@
-import { memo } from '@wordpress/element';
+import { memo, forwardRef } from '@wordpress/element';
 import { TextControl, SelectControl, Button } from '@wordpress/components';
 
 /**
  * Standardized Text Input
  */
-export const FormInput = memo(({ className = '', ...props }) => (
+export const FormInput = memo(forwardRef(({ className = '', ...props }, ref) => (
     <TextControl
+        ref={ref}
         className={`flydb-form-input ${className}`.trim()}
         {...props}
     />
-));
+)));
 
 /**
  * Standardized Select Dropdown

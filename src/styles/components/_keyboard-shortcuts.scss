@@ -1,0 +1,103 @@
+.flydb-keyboard-shortcuts-button {
+    &.components-button {
+        min-width: auto;
+        
+        .components-button__icon {
+            margin: 0;
+        }
+    }
+}
+
+.flydb-keyboard-shortcuts-modal {
+    .components-modal__content {
+        padding: 0;
+    }
+
+    .flydb-shortcuts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        padding: 24px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .flydb-shortcuts-section {
+        .flydb-shortcuts-category {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e1e1e;
+            margin: 0 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2271b1;
+        }
+
+        .flydb-shortcuts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flydb-shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 0;
+
+            .flydb-shortcut-keys {
+                display: flex;
+                gap: 4px;
+                flex-shrink: 0;
+                align-items: center;
+
+                .flydb-kbd {
+                    display: inline-block;
+                    padding: 4px 8px;
+                    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+                    font-size: 12px;
+                    font-weight: 600;
+                    line-height: 1;
+                    color: #1e1e1e;
+                    background: #f0f0f0;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                    min-width: 24px;
+                    text-align: center;
+
+                    &:not(:first-child):not(:last-child) {
+                        background: transparent;
+                        border: none;
+                        box-shadow: none;
+                        padding: 0 4px;
+                        font-weight: 400;
+                        font-size: 11px;
+                        color: #757575;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+                    }
+                }
+            }
+
+            .flydb-shortcut-description {
+                font-size: 13px;
+                color: #50575e;
+                flex: 1;
+            }
+        }
+    }
+
+    .flydb-shortcuts-footer {
+        padding: 16px 24px;
+        background: #f6f7f7;
+        border-top: 1px solid #dcdcde;
+
+        .flydb-shortcuts-note {
+            margin: 0;
+            font-size: 13px;
+            color: #50575e;
+            text-align: center;
+            font-style: italic;
+        }
+    }
+}

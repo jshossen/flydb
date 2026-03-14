@@ -1,14 +1,18 @@
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import TableList from '../components/TableList';
 import Hero from '../components/Hero';
 import StatGrid from '../components/StatGrid';
+import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 
 const TablesPage = () => {
     const [tables, setTables] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
+    const searchInputRef = useRef(null);
 
     useEffect(() => {
         loadTables();
@@ -86,6 +90,14 @@ const TablesPage = () => {
         [tableStats]
     );
 
+    // Keyboard shortcuts
+    const shortcuts = useMemo(() => [
+        { key: '?', shift: true, action: () => setShowKeyboardHelp(true), allowInInput: false },
+        { key: 'Escape', action: () => setShowKeyboardHelp(false), allowInInput: true },
+    ], []);
+
+    useKeyboardShortcuts(shortcuts, !isLoading);
+
     return (
         <div className="flydb-tables-page">
             <Hero
@@ -104,6 +116,11 @@ const TablesPage = () => {
             )}
 
             <TableList tables={tables} isLoading={isLoading} />
+
+            <KeyboardShortcutsModal 
+                isOpen={showKeyboardHelp}
+                onClose={() => setShowKeyboardHelp(false)}
+            />
         </div>
     );
 };

@@ -8,6 +8,9 @@ import Pagination from '../components/Pagination';
 import FilterBuilder from '../components/FilterBuilder';
 import RelationshipPanel from '../components/RelationshipPanel';
 import ExportButton from '../components/ExportButton';
+import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
+import KeyboardShortcutsButton from '../components/KeyboardShortcutsButton';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 import Hero from '../components/Hero';
 import StatGrid from '../components/StatGrid';
@@ -42,9 +45,12 @@ const TableViewerPage = () => {
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [showRelationshipPanel, setShowRelationshipPanel] = useState(false);
+    const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
     const skipDebounceRef = useRef(false);
     const isResizingRef = useRef(false);
+    const searchInputRef = useRef(null);
+    const exportButtonRef = useRef(null);
 
     useEffect(() => {
         if (tableName) {
@@ -238,6 +244,42 @@ const TableViewerPage = () => {
     const derivedTotalPages = tableData?.pagination?.total_pages ?? 1;
     const columnCount = columns.length;
 
+    // Keyboard shortcuts configuration
+    const shortcuts = useMemo(() => [
+        // Navigation
+        { sequence: 'gt', action: () => navigate('/'), allowInInput: false },
+        { key: '/', action: () => searchInputRef.current?.focus(), allowInInput: false },
+        { key: 'Escape', action: () => {
+            if (showFilterPanel || showRelationshipPanel || showKeyboardHelp) {
+                setShowFilterPanel(false);
+                setShowRelationshipPanel(false);
+                setShowKeyboardHelp(false);
+            } else if (searchInput) {
+                setSearchInput('');
+                setSearchQuery('');
+            }
+        }, allowInInput: true },
+        
+        // Table actions
+        { key: 'f', ctrl: true, action: () => setShowFilterPanel(prev => !prev), allowInInput: false },
+        { key: 'r', ctrl: true, action: () => setShowRelationshipPanel(prev => !prev), allowInInput: false },
+        
+        // Pagination
+        { key: 'ArrowLeft', action: () => {
+            if (currentPage > 1) handlePageChange(currentPage - 1);
+        }, allowInInput: false },
+        { key: 'ArrowRight', action: () => {
+            if (currentPage < derivedTotalPages) handlePageChange(currentPage + 1);
+        }, allowInInput: false },
+        { key: 'Home', action: () => handlePageChange(1), allowInInput: false },
+        { key: 'End', action: () => handlePageChange(derivedTotalPages), allowInInput: false },
+        
+        // Help
+        { key: '?', shift: true, action: () => setShowKeyboardHelp(true), allowInInput: false },
+    ], [navigate, currentPage, derivedTotalPages, showFilterPanel, showRelationshipPanel, showKeyboardHelp, searchInput]);
+
+    useKeyboardShortcuts(shortcuts, !isLoading);
+
     const heroMeta = useMemo(() => {
         return [
             `${columnCount} ${columnCount === 1 ? __('column', 'flydb') : __('columns', 'flydb')}`,
@@ -301,6 +343,7 @@ const TableViewerPage = () => {
                         <div className="flydb-toolbar-left">
                             <div className="flydb-search-box">
                                 <FormInput
+                                    ref={searchInputRef}
                                     placeholder={__('Search...', 'flydb')}
                                     value={searchInput}
                                     onChange={setSearchInput}
@@ -388,6 +431,7 @@ const TableViewerPage = () => {
                         </div>
 
                         <div className="flydb-toolbar-right">
+                            <KeyboardShortcutsButton onClick={() => setShowKeyboardHelp(true)} />
                             <ExportButton
                                 table={tableName}
                                 search={searchQuery}
@@ -513,6 +557,11 @@ const TableViewerPage = () => {
                     </div>
                 </div>
             )}
+
+            <KeyboardShortcutsModal 
+                isOpen={showKeyboardHelp}
+                onClose={() => setShowKeyboardHelp(false)}
+            />
         </div>
     );
 };
