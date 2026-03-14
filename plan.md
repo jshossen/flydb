@@ -11,10 +11,10 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
   - [x] Add date range picker + quick presets (Today, Last 7 Days, This Month)
   - [x] Support numeric range (`min/max`) filtering
   - [x] Introduce `IN/NOT IN` multi-value filters and NULL toggles
-- [ ] Week 2: Saved filter presets
-  - [ ] Save named filter combinations per table
-  - [ ] Manage (rename/delete) presets
-  - [ ] Quick-apply dropdown for presets
+- [x] Week 2: Saved filter presets
+  - [x] Save named filter combinations per table
+  - [x] Manage (rename/delete) presets
+  - [x] Quick-apply dropdown for presets
 
 ## Phase 2 – Table Relationships (Weeks 3-4)
 - [x] Week 3: Relationship detection

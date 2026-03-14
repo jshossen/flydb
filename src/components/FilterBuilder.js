@@ -1,11 +1,32 @@
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { close, plus } from '@wordpress/icons';
+import { Button, Modal, TextControl } from '@wordpress/components';
+import { close, plus, download, trash } from '@wordpress/icons';
 import { FormInput, FormSelect, FormButton } from './FormControls';
 
-const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose }) => {
+const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose, tableName = '' }) => {
     const [localFilters, setLocalFilters] = useState(filters);
+    const [savedPresets, setSavedPresets] = useState([]);
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [presetName, setPresetName] = useState('');
+    const [showPresetsDropdown, setShowPresetsDropdown] = useState(false);
+
+    const getPresetsStorageKey = (table) => `flydb_filter_presets_${table}`;
+
+    useEffect(() => {
+        if (!tableName || typeof window === 'undefined') {
+            setSavedPresets([]);
+            return;
+        }
+
+        try {
+            const stored = window.localStorage.getItem(getPresetsStorageKey(tableName));
+            setSavedPresets(stored ? JSON.parse(stored) : []);
+        } catch (error) {
+            console.error('Failed to load filter presets', error);
+            setSavedPresets([]);
+        }
+    }, [tableName]);
 
     const operators = [
         { label: '=', value: '=' },
@@ -183,6 +204,53 @@ const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose })
         onFiltersChange([]);
     };
 
+    const savePreset = () => {
+        if (!presetName.trim() || localFilters.length === 0) {
+            return;
+        }
+
+        const newPreset = {
+            id: Date.now().toString(),
+            name: presetName.trim(),
+            filters: localFilters,
+            createdAt: new Date().toISOString(),
+        };
+
+        const updatedPresets = [...savedPresets, newPreset];
+        setSavedPresets(updatedPresets);
+
+        try {
+            window.localStorage.setItem(
+                getPresetsStorageKey(tableName),
+                JSON.stringify(updatedPresets)
+            );
+        } catch (error) {
+            console.error('Failed to save filter preset', error);
+        }
+
+        setPresetName('');
+        setShowSaveModal(false);
+    };
+
+    const loadPreset = (preset) => {
+        setLocalFilters(preset.filters);
+        setShowPresetsDropdown(false);
+    };
+
+    const deletePreset = (presetId) => {
+        const updatedPresets = savedPresets.filter(p => p.id !== presetId);
+        setSavedPresets(updatedPresets);
+
+        try {
+            window.localStorage.setItem(
+                getPresetsStorageKey(tableName),
+                JSON.stringify(updatedPresets)
+            );
+        } catch (error) {
+            console.error('Failed to delete filter preset', error);
+        }
+    };
+
     const columnOptions = [
         { label: __('Select column...', 'flydb'), value: '' },
         ...columns.map((col) => ({ label: col.name, value: col.name })),
@@ -192,13 +260,52 @@ const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose })
         <div className="flydb-filter-builder">
             <div className="flydb-panel-header">
                 <h3>{__('Filter Builder', 'flydb')}</h3>
-                <Button
-                    icon={close}
-                    onClick={onClose}
-                    label={__('Close', 'flydb')}
-                    className="flydb-panel-close"
-                />
+                <div className="flydb-panel-header-actions">
+                    {savedPresets.length > 0 && (
+                        <Button
+                            icon={download}
+                            onClick={() => setShowPresetsDropdown(!showPresetsDropdown)}
+                            variant="secondary"
+                            className="flydb-presets-toggle"
+                        >
+                            {__('Presets', 'flydb')}
+                        </Button>
+                    )}
+                    <Button
+                        icon={close}
+                        onClick={onClose}
+                        label={__('Close', 'flydb')}
+                        className="flydb-panel-close"
+                    />
+                </div>
             </div>
+
+            {showPresetsDropdown && savedPresets.length > 0 && (
+                <div className="flydb-presets-dropdown">
+                    <div className="flydb-presets-list">
+                        {savedPresets.map((preset) => (
+                            <div key={preset.id} className="flydb-preset-item">
+                                <button
+                                    onClick={() => loadPreset(preset)}
+                                    className="flydb-preset-name"
+                                >
+                                    {preset.name}
+                                    <span className="flydb-preset-count">
+                                        {preset.filters.length} {preset.filters.length === 1 ? __('filter', 'flydb') : __('filters', 'flydb')}
+                                    </span>
+                                </button>
+                                <Button
+                                    icon={trash}
+                                    onClick={() => deletePreset(preset.id)}
+                                    isDestructive
+                                    label={__('Delete preset', 'flydb')}
+                                    className="flydb-preset-delete"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="flydb-panel-body">
                 {localFilters.length === 0 ? (
@@ -336,8 +443,47 @@ const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose })
                     >
                         {__('Clear All', 'flydb')}
                     </FormButton>
+                    {localFilters.length > 0 && (
+                        <FormButton
+                            onClick={() => setShowSaveModal(true)}
+                            variant="secondary"
+                        >
+                            {__('Save Preset', 'flydb')}
+                        </FormButton>
+                    )}
                 </div>
             </div>
+
+            {showSaveModal && (
+                <Modal
+                    title={__('Save Filter Preset', 'flydb')}
+                    onRequestClose={() => setShowSaveModal(false)}
+                    className="flydb-save-preset-modal"
+                >
+                    <TextControl
+                        label={__('Preset Name', 'flydb')}
+                        value={presetName}
+                        onChange={setPresetName}
+                        placeholder={__('e.g., Recent Posts', 'flydb')}
+                        help={__('Give this filter combination a memorable name', 'flydb')}
+                    />
+                    <div className="flydb-modal-actions">
+                        <FormButton
+                            onClick={savePreset}
+                            variant="primary"
+                            disabled={!presetName.trim()}
+                        >
+                            {__('Save', 'flydb')}
+                        </FormButton>
+                        <FormButton
+                            onClick={() => setShowSaveModal(false)}
+                            variant="secondary"
+                        >
+                            {__('Cancel', 'flydb')}
+                        </FormButton>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 };

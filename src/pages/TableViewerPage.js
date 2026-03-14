@@ -466,6 +466,7 @@ const TableViewerPage = () => {
                             filters={filters}
                             onFiltersChange={handleFiltersChange}
                             onClose={() => setShowFilterPanel(false)}
+                            tableName={tableName}
                         />
                     </div>
                 </div>
