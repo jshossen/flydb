@@ -1,0 +1,61 @@
+// Reusable Form Controls Styling
+.flydb-form-input,
+.flydb-form-select {
+    .components-text-control__input,
+    .components-select-control__input {
+        height: 36px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-color: #d1d5db;
+        font-size: 14px;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        transition: all 0.15s ease;
+
+        &:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    }
+
+    .components-select-control__input {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+}
+
+.flydb-form-button {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+
+    &.is-secondary {
+        border-color: #d1d5db;
+        background: #ffffff;
+
+        &:hover:not(:disabled) {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f9fafb;
+        }
+    }
+
+    &.is-primary {
+        background: #667eea;
+        border-color: #667eea;
+
+        &:hover:not(:disabled) {
+            background: #764ba2;
+            border-color: #764ba2;
+        }
+    }
+}

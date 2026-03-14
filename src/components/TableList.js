@@ -1,7 +1,8 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, TextControl, Spinner, Card, CardBody } from '@wordpress/components';
+import { Spinner, Card, CardBody } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
+import { FormInput, FormButton } from './FormControls';
 
 const TableList = ({ tables = [], isLoading = false }) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -56,7 +57,7 @@ const TableList = ({ tables = [], isLoading = false }) => {
             <Card className="flydb-card">
                 <CardBody>
                     <div className="flydb-table-list-header">
-                        <TextControl
+                        <FormInput
                             placeholder={__('Search tables...', 'flydb')}
                             value={searchQuery}
                             onChange={setSearchQuery}
@@ -139,13 +140,13 @@ const TableList = ({ tables = [], isLoading = false }) => {
                             <td>{table.created || '-'}</td>
                             <td>{table.updated || '-'}</td>
                             <td>
-                                <Button
+                                <FormButton
                                     variant="secondary"
                                     size="small"
                                     onClick={() => handleTableClick(table.name)}
                                 >
                                     {__('View', 'flydb')}
-                                </Button>
+                                </FormButton>
                             </td>
                         </tr>
                     ))}

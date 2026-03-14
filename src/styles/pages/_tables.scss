@@ -1,0 +1,121 @@
+.flydb-tables-page {
+    .flydb-stat-grid {
+        margin-bottom: 24px;
+    }
+
+    .flydb-table-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .flydb-search-input {
+            flex: 1;
+            max-width: 400px;
+
+            input {
+                border-radius: 8px;
+                border: 1px solid #d1d5db;
+
+                &:focus {
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                }
+            }
+        }
+
+        .flydb-table-count {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    }
+
+    .flydb-table-card-body {
+        padding: 0 !important;
+        overflow: hidden;
+    }
+
+    .flydb-tables-table {
+        margin: 0;
+        border: none;
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th {
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e5e7eb;
+
+            &.sortable {
+                cursor: pointer;
+                user-select: none;
+                transition: background 0.15s ease;
+
+                &:hover {
+                    background: #f3f4f6;
+                }
+
+                &.sorted {
+                    background: #eff6ff;
+                    color: #1e40af;
+                }
+            }
+        }
+
+        tbody tr {
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: #f9fafb;
+            }
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #111827;
+
+            &.num {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .flydb-highlight {
+                background: #fef3c7;
+                color: inherit;
+                padding: 0 2px;
+                border-radius: 2px;
+            }
+        }
+
+        .table-name {
+            strong {
+                font-weight: 600;
+            }
+
+            a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 600;
+                transition: color 0.15s ease;
+
+                &:hover {
+                    color: #764ba2;
+                }
+            }
+        }
+    }
+
+    .flydb-no-results {
+        text-align: center;
+        padding: 40px 20px;
+        color: #646970;
+    }
+}

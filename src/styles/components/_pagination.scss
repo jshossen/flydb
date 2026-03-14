@@ -1,0 +1,62 @@
+.flydb-app {
+    .flydb-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        gap: 20px;
+
+        .flydb-pagination-info {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .flydb-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .flydb-page-input {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+
+                .flydb-page-number {
+                    width: 70px;
+                    height: 36px;
+                    text-align: center;
+                    padding: 0 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 14px;
+
+                    &:focus {
+                        border-color: #667eea;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    }
+                }
+
+                .flydb-page-total {
+                    color: #6b7280;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+            }
+
+            .flydb-per-page-select {
+                margin-bottom: 0;
+
+                select {
+                    min-width: 100px;
+                    height: 36px;
+                    padding: 0 12px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+}

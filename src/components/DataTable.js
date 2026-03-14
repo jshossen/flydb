@@ -1,10 +1,12 @@
-import { useState } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
-import { arrowUp, arrowDown } from '@wordpress/icons';
 
-const DataTable = ({ columns = [], rows = [], isLoading = false, onSort, sortColumn, sortOrder }) => {
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const DataTable = ({ columns = [], rows = [], isLoading = false, onSort, sortColumn, sortOrder, highlightQuery = '' }) => {
     const [hiddenColumns, setHiddenColumns] = useState([]);
+    const normalizedHighlight = useMemo(() => highlightQuery.trim(), [highlightQuery]);
 
     const handleSort = (columnName) => {
         if (onSort) {
@@ -40,6 +42,40 @@ const DataTable = ({ columns = [], rows = [], isLoading = false, onSort, sortCol
 
     const visibleColumns = columns.filter((col) => !hiddenColumns.includes(col.name));
 
+    const renderHighlightedValue = (value) => {
+        if (value === null || value === undefined) {
+            return <em className="null-value">NULL</em>;
+        }
+
+        const stringValue = typeof value === 'string' ? value : String(value);
+
+        if (!normalizedHighlight) {
+            return stringValue;
+        }
+
+        try {
+            const regex = new RegExp(`(${escapeRegExp(normalizedHighlight)})`, 'gi');
+            if (!regex.test(stringValue)) {
+                return stringValue;
+            }
+
+            const parts = stringValue.split(regex);
+
+            return parts.map((part, index) =>
+                part.toLowerCase() === normalizedHighlight.toLowerCase() ? (
+                    <mark key={`${part}-${index}`} className="flydb-highlight">
+                        {part}
+                    </mark>
+                ) : (
+                    <span key={`${part}-${index}`}>{part}</span>
+                )
+            );
+        } catch (error) {
+            console.error('Failed to highlight text', error);
+            return stringValue;
+        }
+    };
+
     return (
         <div className="flydb-data-table-container">
             <div className="flydb-table-wrapper">
@@ -72,15 +108,11 @@ const DataTable = ({ columns = [], rows = [], isLoading = false, onSort, sortCol
                             <tr key={rowIndex}>
                                 {visibleColumns.map((column) => {
                                     const value = row[column.name];
-                                    const displayValue = value === null ? (
-                                        <em className="null-value">NULL</em>
-                                    ) : (
-                                        value
-                                    );
 
                                     return (
-                                        <td key={column.name} title={value}>
-                                            {displayValue}
+                                        <td key={column.name} title={value}
+                                            >
+                                            {renderHighlightedValue(value)}
                                         </td>
                                     );
                                 })}

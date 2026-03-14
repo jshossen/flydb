@@ -1,0 +1,1064 @@
+// FlyDB React Admin Styles
+
+.flydb-app {
+    margin: 20px 20px 20px 0;
+    
+    // Global card styles
+    .flydb-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        
+        .components-card__body {
+            padding: 24px;
+        }
+        
+        &.flydb-toolbar-card {
+            .components-card__body {
+                padding: 20px;
+            }
+        }
+        
+        &.flydb-pagination-card {
+            margin-bottom: 0;
+        }
+    }
+    
+    .flydb-page-header {
+        margin-bottom: 20px;
+        
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 23px;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+        
+        .flydb-page-description {
+            color: #646970;
+            font-size: 14px;
+        }
+        
+        .flydb-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+    }
+    
+    // Loading States
+    .flydb-loading {
+        text-align: center;
+        padding: 60px 20px;
+        
+        .components-spinner {
+            margin: 0 auto 20px;
+        }
+    }
+    
+    // Tables Page
+    .flydb-tables-page {
+        .flydb-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 24px 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+            .flydb-hero-content {
+                .flydb-hero-label {
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    font-size: 10px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.75);
+                    margin: 0 0 8px 0;
+                }
+
+                h1 {
+                    margin: 0 0 12px 0;
+                    font-size: 26px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    line-height: 1.2;
+                }
+
+                .flydb-hero-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+
+                    .flydb-chip {
+                        background: rgba(255, 255, 255, 0.2);
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        border-radius: 16px;
+                        padding: 4px 12px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #ffffff;
+                    }
+                }
+
+                .flydb-search-history {
+                    .components-dropdown__content {
+                        min-width: 220px;
+                        padding: 8px 0;
+                    }
+
+                    .flydb-search-history__menu {
+                        min-width: 220px;
+                    }
+
+                    .flydb-search-history__empty {
+                        padding: 12px 16px;
+                        font-size: 13px;
+                        color: #6b7280;
+                        text-align: center;
+                    }
+                }
+            }
+
+            .flydb-hero-description {
+                margin-top: 12px;
+                
+                p {
+                    margin: 0;
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: 13px;
+                    line-height: 1.5;
+                    max-width: 700px;
+                }
+            }
+        }
+        
+        .flydb-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 0 0 24px 0;
+
+            .flydb-stat-card {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 16px 18px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                transition: all 0.2s ease;
+                overflow: hidden;
+
+                &:hover {
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    transform: translateY(-1px);
+                }
+
+                .flydb-stat-label {
+                    display: block;
+                    font-size: 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    font-weight: 600;
+                    color: #6b7280;
+                    margin-bottom: 8px;
+                }
+
+                strong {
+                    display: block;
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #111827;
+                    margin-bottom: 2px;
+                    line-height: 1.1;
+                    word-break: break-word;
+                    overflow-wrap: break-word;
+                }
+
+                small {
+                    color: #9ca3af;
+                    font-size: 11px;
+                    display: block;
+                    margin-top: 4px;
+                    line-height: 1.3;
+                }
+            }
+        }
+        
+        .flydb-table-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            .flydb-search-input {
+                flex: 1;
+                max-width: 400px;
+                
+                input {
+                    border-radius: 8px;
+                    border: 1px solid #d1d5db;
+                    
+                    &:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    }
+                }
+            }
+            
+            .flydb-table-count {
+                color: #6b7280;
+                font-size: 14px;
+                font-weight: 500;
+            }
+        }
+        
+        .flydb-table-card-body {
+            padding: 0 !important;
+            overflow: hidden;
+        }
+        
+        .flydb-tables-table {
+            margin: 0;
+            border: none;
+            
+            thead {
+                background: #f9fafb;
+            }
+            
+            th {
+                padding: 16px 20px;
+                font-weight: 600;
+                font-size: 13px;
+                color: #374151;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                border-bottom: 2px solid #e5e7eb;
+                
+                &.sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    transition: background 0.15s ease;
+                    
+                    &:hover {
+                        background: #f3f4f6;
+                    }
+                    
+                    &.sorted {
+                        background: #eff6ff;
+                        color: #1e40af;
+                    }
+                }
+            }
+            
+            tbody tr {
+                transition: background 0.15s ease;
+                
+                &:hover {
+                    background: #f9fafb;
+                }
+            }
+            
+            td {
+                padding: 16px 20px;
+                border-bottom: 1px solid #f3f4f6;
+                font-size: 14px;
+                color: #111827;
+                
+                &.num {
+                    text-align: right;
+                    font-variant-numeric: tabular-nums;
+                }
+                
+                .flydb-highlight {
+                    background: #fef3c7;
+                    color: inherit;
+                    padding: 0 2px;
+                    border-radius: 2px;
+                }
+            }
+            
+            .table-name {
+                strong {
+                    font-weight: 600;
+                }
+                
+                a {
+                    color: #667eea;
+                    text-decoration: none;
+                    font-weight: 600;
+                    transition: color 0.15s ease;
+                    
+                    &:hover {
+                        color: #764ba2;
+                    }
+                }
+            }
+        }
+        
+        .flydb-no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #646970;
+        }
+    }
+    
+    // Table Viewer Page
+    .flydb-table-viewer-page {
+        .flydb-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 24px 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+
+            .flydb-hero-content {
+                .flydb-back-button {
+                    margin-bottom: 12px;
+                    background: rgba(255, 255, 255, 0.2);
+                    color: #ffffff;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                    }
+                }
+
+                .flydb-hero-label {
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    font-size: 10px;
+                    font-weight: 600;
+                    color: rgba(255, 255, 255, 0.75);
+                    margin: 0 0 8px 0;
+                }
+
+                h1 {
+                    margin: 0 0 12px 0;
+                    font-size: 26px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    line-height: 1.2;
+                }
+
+                .flydb-hero-meta {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+
+                    .flydb-chip {
+                        background: rgba(255, 255, 255, 0.2);
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        border-radius: 16px;
+                        padding: 4px 12px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #ffffff;
+                    }
+                }
+            }
+
+            .flydb-hero-description {
+                p {
+                    margin: 0;
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: 13px;
+                    line-height: 1.5;
+                    max-width: 700px;
+                }
+            }
+        }
+
+        .flydb-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 0 0 24px 0;
+
+            .flydb-stat-card {
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 16px 18px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                transition: all 0.2s ease;
+                overflow: hidden;
+
+                &:hover {
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    transform: translateY(-1px);
+                }
+
+                .flydb-stat-label {
+                    display: block;
+                    font-size: 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                    font-weight: 600;
+                    color: #6b7280;
+                    margin-bottom: 8px;
+                }
+
+                strong {
+                    display: block;
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #111827;
+                    margin-bottom: 2px;
+                    line-height: 1.1;
+                    word-break: break-word;
+                    overflow-wrap: break-word;
+                }
+
+                small {
+                    color: #9ca3af;
+                    font-size: 11px;
+                    display: block;
+                    margin-top: 4px;
+                    line-height: 1.3;
+                }
+            }
+        }
+
+        .flydb-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0;
+            gap: 16px;
+            flex-wrap: wrap;
+            
+            .flydb-toolbar-left,
+            .flydb-toolbar-right {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .flydb-search-box {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                
+                input {
+                    min-width: 250px;
+                    height: 36px;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border: 1px solid #d1d5db;
+                    font-size: 14px;
+                    
+                    &:focus {
+                        border-color: #667eea;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    }
+                }
+                
+                .flydb-highlight {
+                    background: #fef3c7;
+                    color: inherit;
+                    padding: 0 2px;
+                    border-radius: 2px;
+                }
+            }
+            
+            .flydb-filter-badge {
+                display: inline-block;
+                min-width: 18px;
+                height: 18px;
+                line-height: 18px;
+                padding: 0 5px;
+                background: #d63638;
+                color: #fff;
+                border-radius: 9px;
+                font-size: 11px;
+                font-weight: 600;
+                text-align: center;
+                margin-left: 5px;
+            }
+        }
+        
+        .flydb-active-filters {
+            padding: 16px 20px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            
+            strong {
+                color: #1e40af;
+            }
+            
+            .flydb-filter-tag {
+                display: inline-block;
+                margin-left: 12px;
+                padding: 6px 12px;
+                background: #ffffff;
+                border: 1px solid #93c5fd;
+                border-radius: 6px;
+                font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+                font-size: 12px;
+                color: #1e40af;
+            }
+        }
+        
+        // Column Blueprint Card
+        .flydb-columns-card {
+            .flydb-columns-card__header {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 2px solid #f3f4f6;
+
+                h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #111827;
+                }
+
+                span {
+                    color: #6b7280;
+                    font-size: 14px;
+                    font-weight: 500;
+                    background: #f3f4f6;
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                }
+            }
+
+            .flydb-columns-chip-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+
+                .flydb-column-chip {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 8px;
+                    padding: 10px 14px;
+                    min-width: 140px;
+                    background: #ffffff;
+                    transition: all 0.15s ease;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+                    &:hover {
+                        background: #f9fafb;
+                        border-color: #d1d5db;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+                    }
+
+                    .flydb-column-name {
+                        display: block;
+                        font-weight: 600;
+                        font-size: 13px;
+                        color: #111827;
+                        margin-bottom: 4px;
+                        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+                    }
+
+                    .flydb-column-type {
+                        font-size: 11px;
+                        color: #6b7280;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        font-weight: 500;
+                    }
+
+                    &.flydb-column-chip--more {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 600;
+                        font-size: 13px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        border-color: #667eea;
+                        color: #ffffff;
+                        
+                        &:hover {
+                            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Data Table
+    .flydb-data-table-container {
+        .flydb-table-wrapper {
+            overflow-x: auto;
+            max-height: 70vh;
+            border-radius: 8px;
+        }
+        
+        .flydb-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            
+            thead {
+                position: sticky;
+                top: 0;
+                background: #f9fafb;
+                z-index: 10;
+            }
+            
+            th {
+                padding: 16px 20px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 13px;
+                color: #374151;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                cursor: pointer;
+                user-select: none;
+                white-space: nowrap;
+                border-bottom: 2px solid #e5e7eb;
+                transition: background 0.15s ease;
+                
+                &:hover {
+                    background: #f3f4f6;
+                }
+                
+                &.sorted {
+                    background: #eff6ff;
+                    color: #1e40af;
+                }
+                
+                .flydb-header-content {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                }
+                
+                .flydb-column-type {
+                    display: block;
+                    font-size: 11px;
+                    font-weight: normal;
+                    color: #646970;
+                    margin-top: 2px;
+                }
+                
+                .sort-icon {
+                    color: #667eea;
+                }
+            }
+            
+            td {
+                padding: 16px 20px;
+                border-bottom: 1px solid #f3f4f6;
+                font-size: 14px;
+                color: #111827;
+                max-width: 300px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                
+                &:hover {
+                    overflow: visible;
+                    white-space: normal;
+                    word-wrap: break-word;
+                }
+                
+                .null-value {
+                    color: #999;
+                    font-style: italic;
+                }
+                
+                .flydb-highlight {
+                    background: #fef3c7;
+                    color: inherit;
+                    padding: 0 2px;
+                    border-radius: 2px;
+                }
+            }
+            
+            tbody tr {
+                transition: background 0.15s ease;
+                
+                &:hover {
+                    background: #f9fafb;
+                }
+            }
+        }
+        
+        .flydb-table-loading,
+        .flydb-table-empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6b7280;
+            font-size: 15px;
+        }
+        
+        .flydb-hidden-columns-notice {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #eff6ff;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+    }
+    
+    // Pagination
+    .flydb-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+        gap: 20px;
+        
+        .flydb-pagination-info {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .flydb-pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            
+            .flydb-page-input {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                
+                .flydb-page-number {
+                    width: 70px;
+                    height: 36px;
+                    text-align: center;
+                    padding: 0 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    
+                    &:focus {
+                        border-color: #667eea;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    }
+                }
+                
+                .flydb-page-total {
+                    color: #6b7280;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+            }
+            
+            .flydb-per-page-select {
+                margin-bottom: 0;
+                
+                select {
+                    min-width: 100px;
+                    height: 36px;
+                    padding: 0 12px;
+                    border-radius: 6px;
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+    
+    // Filter Panel
+    .flydb-panel-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99999;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .flydb-panel {
+        width: 400px;
+        height: 100%;
+        background: #fff;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        
+        .flydb-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #dcdcde;
+            
+            h3 {
+                margin: 0;
+                font-size: 16px;
+            }
+            
+            .flydb-panel-close {
+                padding: 5px;
+            }
+        }
+        
+        .flydb-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            
+            .flydb-no-filters {
+                text-align: center;
+                padding: 40px 20px;
+                color: #646970;
+            }
+            
+            .flydb-filters-list {
+                .flydb-filter-row {
+                    display: flex;
+                    gap: 8px;
+                    margin-bottom: 15px;
+                    align-items: flex-start;
+                    
+                    .components-base-control {
+                        margin-bottom: 0;
+                        flex: 1;
+                    }
+                    
+                    .flydb-filter-column {
+                        flex: 1.5;
+                    }
+                    
+                    .flydb-filter-operator {
+                        flex: 1;
+                    }
+                    
+                    .flydb-filter-value {
+                        flex: 2;
+                    }
+                    
+                    .flydb-remove-filter {
+                        flex-shrink: 0;
+                        margin-top: 28px;
+                    }
+                }
+            }
+            
+            .flydb-filter-actions {
+                margin: 20px 0;
+            }
+        }
+        
+        .flydb-panel-footer {
+            padding: 20px 0px;
+            border-top: 1px solid #dcdcde;
+            display: flex;
+            gap: 10px;
+        }
+    }
+    
+    // Export Dropdown
+    .flydb-export-dropdown {
+        .flydb-export-menu {
+            min-width: 200px;
+            
+            .components-menu-group {
+                margin: 0;
+            }
+            
+            .components-menu-item__item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    }
+    
+    // Responsive
+    @media screen and (max-width: 1024px) {
+        .flydb-table-viewer-page,
+        .flydb-tables-page {
+            .flydb-hero {
+                padding: 32px;
+                
+                .flydb-hero-content h1 {
+                    font-size: 28px;
+                }
+            }
+            
+            .flydb-stat-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+    }
+    
+    @media screen and (max-width: 782px) {
+        .flydb-app {
+            margin: 10px 10px 10px 0;
+        }
+        
+        .flydb-table-viewer-page,
+        .flydb-tables-page {
+            .flydb-hero {
+                padding: 24px;
+                
+                .flydb-hero-content h1 {
+                    font-size: 24px;
+                }
+                
+                .flydb-hero-description p {
+                    font-size: 14px;
+                }
+            }
+            
+            .flydb-stat-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                
+                .flydb-stat-card {
+                    padding: 20px;
+                    
+                    strong {
+                        font-size: 28px;
+                    }
+                }
+            }
+        }
+        
+        .flydb-panel {
+            width: 100%;
+        }
+        
+        .flydb-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            
+            .flydb-toolbar-left,
+            .flydb-toolbar-right {
+                width: 100%;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .flydb-search-box {
+                width: 100%;
+                
+                input {
+                    width: 100%;
+                }
+            }
+        }
+        
+        .flydb-pagination {
+            flex-direction: column;
+            gap: 16px;
+            
+            .flydb-pagination-info {
+                text-align: center;
+            }
+            
+            .flydb-pagination-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        
+        .flydb-tables-page .flydb-table-list-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: stretch;
+            
+            .flydb-search-input {
+                max-width: 100%;
+            }
+            
+            .flydb-table-count {
+                text-align: center;
+            }
+        }
+    }
+}
+
+// WordPress Admin Compatibility
+.wp-admin {
+    .flydb-app {
+        .components-button {
+            height: 36px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            
+            &.is-secondary {
+                border-color: #d1d5db;
+                background: #ffffff;
+                
+                &:hover:not(:disabled) {
+                    border-color: #667eea;
+                    color: #667eea;
+                    background: #f9fafb;
+                }
+            }
+            
+            &.is-primary {
+                background: #667eea;
+                border-color: #667eea;
+                
+                &:hover:not(:disabled) {
+                    background: #764ba2;
+                    border-color: #764ba2;
+                }
+            }
+        }
+
+
+        .components-base-control {
+            margin-bottom: 0;
+            .components-base-control__field {
+                margin-bottom: 0;
+            }
+        }
+        
+        .components-text-control__input {
+            height: 36px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-color: #d1d5db;
+            font-size: 14px;
+            
+            &:focus {
+                border-color: #667eea;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+        }
+        
+        .components-select-control__input {
+            height: 36px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-color: #d1d5db;
+            font-size: 14px;
+            
+            &:focus {
+                border-color: #667eea;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+        }
+    }
+}

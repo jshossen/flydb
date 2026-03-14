@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { Button, SelectControl } from '@wordpress/components';
+import { FormSelect, FormButton } from './FormControls';
 
 const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange, onPerPageChange }) => {
     const start = ((currentPage - 1) * perPage) + 1;
@@ -23,7 +23,7 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
             </div>
 
             <div className="flydb-pagination-controls">
-                <Button
+                <FormButton
                     variant="secondary"
                     size="small"
                     onClick={() => onPageChange(1)}
@@ -31,9 +31,9 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
                     icon="controls-skipback"
                 >
                     {__('First', 'flydb')}
-                </Button>
+                </FormButton>
 
-                <Button
+                <FormButton
                     variant="secondary"
                     size="small"
                     onClick={() => onPageChange(currentPage - 1)}
@@ -41,7 +41,7 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
                     icon="arrow-left-alt2"
                 >
                     {__('Previous', 'flydb')}
-                </Button>
+                </FormButton>
 
                 <div className="flydb-page-input">
                     <input
@@ -57,7 +57,7 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
                     </span>
                 </div>
 
-                <Button
+                <FormButton
                     variant="secondary"
                     size="small"
                     onClick={() => onPageChange(currentPage + 1)}
@@ -65,9 +65,9 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
                     icon="arrow-right-alt2"
                 >
                     {__('Next', 'flydb')}
-                </Button>
+                </FormButton>
 
-                <Button
+                <FormButton
                     variant="secondary"
                     size="small"
                     onClick={() => onPageChange(totalPages)}
@@ -75,9 +75,9 @@ const Pagination = ({ currentPage, totalPages, perPage, totalRows, onPageChange,
                     icon="controls-skipforward"
                 >
                     {__('Last', 'flydb')}
-                </Button>
+                </FormButton>
 
-                <SelectControl
+                <FormSelect
                     value={perPage.toString()}
                     options={[
                         { label: '50 rows', value: '50' },

@@ -1,13 +1,21 @@
-import { useState, useEffect, useMemo } from '@wordpress/element';
+import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardBody, TextControl, Notice } from '@wordpress/components';
-import { arrowLeft, filter as filterIcon } from '@wordpress/icons';
+import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import { arrowLeft, filter as filterIcon, postDate } from '@wordpress/icons';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
 import FilterBuilder from '../components/FilterBuilder';
 import ExportButton from '../components/ExportButton';
 import flydbApi from '../api/flydbApi';
+import Hero from '../components/Hero';
+import StatGrid from '../components/StatGrid';
+import { FormInput, FormButton } from '../components/FormControls';
+
+const SEARCH_DEBOUNCE_MS = 500;
+const SEARCH_HISTORY_LIMIT = 6;
+
+const getHistoryStorageKey = (table) => `flydb_search_history_${table}`;
 
 const TableViewerPage = () => {
     const { tableName } = useParams();
@@ -26,17 +34,93 @@ const TableViewerPage = () => {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchInput, setSearchInput] = useState('');
+    const [searchHistory, setSearchHistory] = useState([]);
     const [sortColumn, setSortColumn] = useState('');
     const [sortOrder, setSortOrder] = useState('ASC');
     const [filters, setFilters] = useState([]);
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
+    const skipDebounceRef = useRef(false);
 
     useEffect(() => {
         if (tableName) {
             loadTableData();
         }
     }, [tableName, currentPage, perPage, searchQuery, sortColumn, sortOrder, filters]);
+
+    const persistHistory = useCallback(
+        (history) => {
+            if (!tableName || typeof window === 'undefined') {
+                return;
+            }
+
+            try {
+                window.localStorage.setItem(getHistoryStorageKey(tableName), JSON.stringify(history));
+            } catch (storageError) {
+                console.error('Failed to persist search history', storageError);
+            }
+        },
+        [tableName]
+    );
+
+    const recordSearchTerm = useCallback(
+        (term) => {
+            const normalized = term.trim();
+            if (!normalized) {
+                return;
+            }
+
+            setSearchHistory((prev) => {
+                const filtered = prev.filter((item) => item.toLowerCase() !== normalized.toLowerCase());
+                const updated = [normalized, ...filtered].slice(0, SEARCH_HISTORY_LIMIT);
+                persistHistory(updated);
+                return updated;
+            });
+        },
+        [persistHistory]
+    );
+
+    useEffect(() => {
+        if (!tableName || typeof window === 'undefined') {
+            setSearchHistory([]);
+            return;
+        }
+
+        try {
+            const stored = window.localStorage.getItem(getHistoryStorageKey(tableName));
+            setSearchHistory(stored ? JSON.parse(stored) : []);
+        } catch (storageError) {
+            console.error('Failed to load search history', storageError);
+            setSearchHistory([]);
+        }
+    }, [tableName]);
+
+    useEffect(() => {
+        if (!tableName) {
+            return;
+        }
+
+        if (skipDebounceRef.current) {
+            skipDebounceRef.current = false;
+            return;
+        }
+
+        const normalizedInput = searchInput.trim();
+
+        if (normalizedInput === searchQuery) {
+            return;
+        }
+
+        const handler = setTimeout(() => {
+            setSearchQuery(normalizedInput);
+            setCurrentPage(1);
+            if (normalizedInput) {
+                recordSearchTerm(normalizedInput);
+            }
+        }, SEARCH_DEBOUNCE_MS);
+
+        return () => clearTimeout(handler);
+    }, [searchInput, tableName, searchQuery, recordSearchTerm]);
 
     const loadTableData = async () => {
         setIsLoading(true);
@@ -69,8 +153,14 @@ const TableViewerPage = () => {
     };
 
     const handleSearch = () => {
-        setSearchQuery(searchInput);
+        const normalized = searchInput.trim();
+        skipDebounceRef.current = true;
+        setSearchInput(normalized);
+        setSearchQuery(normalized);
         setCurrentPage(1);
+        if (normalized) {
+            recordSearchTerm(normalized);
+        }
     };
 
     const handleSort = (column, order) => {
@@ -99,6 +189,19 @@ const TableViewerPage = () => {
         navigate('/');
     };
 
+    const handleHistorySelect = (term) => {
+        skipDebounceRef.current = true;
+        setSearchInput(term);
+        setSearchQuery(term);
+        setCurrentPage(1);
+        recordSearchTerm(term);
+    };
+
+    const handleClearHistory = () => {
+        setSearchHistory([]);
+        persistHistory([]);
+    };
+
     const derivedTotalRows = tableData?.pagination?.total_rows ?? rows.length;
     const derivedTotalPages = tableData?.pagination?.total_pages ?? 1;
     const columnCount = columns.length;
@@ -113,34 +216,44 @@ const TableViewerPage = () => {
 
     const columnPreview = useMemo(() => columns.slice(0, 4), [columns]);
 
+    const statCards = useMemo(
+        () => [
+            {
+                label: __('Total rows', 'flydb'),
+                value: derivedTotalRows.toLocaleString(),
+                subtext: __('Across entire table', 'flydb'),
+            },
+            {
+                label: __('Visible rows', 'flydb'),
+                value: rows.length.toLocaleString(),
+                subtext: __('On this page', 'flydb'),
+            },
+            {
+                label: __('Columns', 'flydb'),
+                value: columnCount,
+                subtext: __('Detected automatically', 'flydb'),
+            },
+        ],
+        [derivedTotalRows, rows.length, columnCount]
+    );
+
     return (
         <div className="flydb-table-viewer-page">
-            <div className="flydb-hero">
-                <div className="flydb-hero-content">
-                    <Button
-                        icon={arrowLeft}
-                        onClick={handleBackToTables}
-                        variant="secondary"
-                        className="flydb-back-button"
-                    >
-                        {__('Back to Tables', 'flydb')}
-                    </Button>
-                    <p className="flydb-hero-label">{__('Table', 'flydb')}</p>
-                    <h1>{tableName}</h1>
-                    <div className="flydb-hero-meta">
-                        {heroMeta.map((item, index) => (
-                            <span key={index} className="flydb-chip">
-                                {item}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-                <div className="flydb-hero-description">
-                    <p>
-                        {__('Explore structure, filter data, and export this table without touching SQL. Updates happen in real-time over the REST API.', 'flydb')}
-                    </p>
-                </div>
-            </div>
+            <Hero
+                label={__('Table', 'flydb')}
+                title={tableName}
+                meta={heroMeta}
+                description={__('Explore structure, filter data, and export this table without touching SQL. Updates happen in real-time over the REST API.', 'flydb')}
+            >
+                <Button
+                    icon={arrowLeft}
+                    onClick={handleBackToTables}
+                    // variant="secondary"
+                    className="flydb-back-button"
+                >
+                    {__('Back to Tables', 'flydb')}
+                </Button>
+            </Hero>
 
             {error && (
                 <Notice status="error" isDismissible={false}>
@@ -148,30 +261,14 @@ const TableViewerPage = () => {
                 </Notice>
             )}
 
-            <div className="flydb-stat-grid">
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Total rows', 'flydb')}</span>
-                    <strong>{derivedTotalRows.toLocaleString()}</strong>
-                    <small>{__('Across entire table', 'flydb')}</small>
-                </div>
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Visible rows', 'flydb')}</span>
-                    <strong>{rows.length.toLocaleString()}</strong>
-                    <small>{__('On this page', 'flydb')}</small>
-                </div>
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Columns', 'flydb')}</span>
-                    <strong>{columnCount}</strong>
-                    <small>{__('Detected automatically', 'flydb')}</small>
-                </div>
-            </div>
+            <StatGrid stats={statCards} />
 
             <Card className="flydb-card">
                 <CardBody className="flydb-toolbar-card">
                     <div className="flydb-toolbar">
                         <div className="flydb-toolbar-left">
                             <div className="flydb-search-box">
-                                <TextControl
+                                <FormInput
                                     placeholder={__('Search...', 'flydb')}
                                     value={searchInput}
                                     onChange={setSearchInput}
@@ -181,9 +278,56 @@ const TableViewerPage = () => {
                                         }
                                     }}
                                 />
-                                <Button variant="secondary" onClick={handleSearch}>
+                                <FormButton variant="secondary" onClick={handleSearch}>
                                     {__('Search', 'flydb')}
-                                </Button>
+                                </FormButton>
+                                <Dropdown
+                                    className="flydb-search-history"
+                                    position="bottom right"
+                                    renderToggle={({ isOpen, onToggle }) => (
+                                        <Button
+                                            variant="secondary"
+                                            icon={postDate}
+                                            onClick={onToggle}
+                                            aria-expanded={isOpen}
+                                        >
+                                            {__('History', 'flydb')}
+                                        </Button>
+                                    )}
+                                    renderContent={({ onClose }) => (
+                                        <div className="flydb-search-history__menu">
+                                            <MenuGroup label={__('Recent searches', 'flydb')}>
+                                                {searchHistory.length === 0 && (
+                                                    <div className="flydb-search-history__empty">
+                                                        {__('No recent searches yet.', 'flydb')}
+                                                    </div>
+                                                )}
+                                                {searchHistory.map((term) => (
+                                                    <MenuItem
+                                                        key={term}
+                                                        onClick={() => {
+                                                            handleHistorySelect(term);
+                                                            onClose();
+                                                        }}
+                                                    >
+                                                        {term}
+                                                    </MenuItem>
+                                                ))}
+                                            </MenuGroup>
+                                            {searchHistory.length > 0 && (
+                                                <MenuItem
+                                                    isDestructive
+                                                    onClick={() => {
+                                                        handleClearHistory();
+                                                        onClose();
+                                                    }}
+                                                >
+                                                    {__('Clear history', 'flydb')}
+                                                </MenuItem>
+                                            )}
+                                        </div>
+                                    )}
+                                />
                             </div>
 
                             <Button
@@ -253,6 +397,7 @@ const TableViewerPage = () => {
                         onSort={handleSort}
                         sortColumn={sortColumn}
                         sortOrder={sortOrder}
+                        highlightQuery={searchQuery}
                     />
                 </CardBody>
             </Card>

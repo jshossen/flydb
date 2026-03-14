@@ -1,7 +1,8 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button, SelectControl, TextControl, Panel, PanelBody } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { close, plus } from '@wordpress/icons';
+import { FormInput, FormSelect, FormButton } from './FormControls';
 
 const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose }) => {
     const [localFilters, setLocalFilters] = useState(filters);
@@ -73,21 +74,21 @@ const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose })
                     <div className="flydb-filters-list">
                         {localFilters.map((filter, index) => (
                             <div key={index} className="flydb-filter-row">
-                                <SelectControl
+                                <FormSelect
                                     value={filter.column}
                                     options={columnOptions}
                                     onChange={(value) => updateFilter(index, 'column', value)}
                                     className="flydb-filter-column"
                                 />
 
-                                <SelectControl
+                                <FormSelect
                                     value={filter.operator}
                                     options={operators}
                                     onChange={(value) => updateFilter(index, 'operator', value)}
                                     className="flydb-filter-operator"
                                 />
 
-                                <TextControl
+                                <FormInput
                                     value={filter.value}
                                     onChange={(value) => updateFilter(index, 'value', value)}
                                     placeholder={__('Value...', 'flydb')}
@@ -107,28 +108,28 @@ const FilterBuilder = ({ columns = [], filters = [], onFiltersChange, onClose })
                 )}
 
                 <div className="flydb-filter-actions">
-                    <Button
+                    <FormButton
                         icon={plus}
                         onClick={addFilter}
                         variant="secondary"
                     >
                         {__('Add Filter', 'flydb')}
-                    </Button>
+                    </FormButton>
                 </div>
 
                 <div className="flydb-panel-footer">
-                    <Button
+                    <FormButton
                         onClick={applyFilters}
                         variant="primary"
                     >
                         {__('Apply Filters', 'flydb')}
-                    </Button>
-                    <Button
+                    </FormButton>
+                    <FormButton
                         onClick={clearFilters}
                         variant="secondary"
                     >
                         {__('Clear All', 'flydb')}
-                    </Button>
+                    </FormButton>
                 </div>
             </div>
         </div>

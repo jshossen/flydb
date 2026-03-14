@@ -1,0 +1,103 @@
+@media screen and (max-width: 1024px) {
+    .flydb-table-viewer-page,
+    .flydb-tables-page {
+        .flydb-hero {
+            padding: 32px;
+
+            .flydb-hero-content h1 {
+                font-size: 28px;
+            }
+        }
+
+        .flydb-stat-grid {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+    }
+}
+
+@media screen and (max-width: 782px) {
+    .flydb-app {
+        margin: 10px 10px 10px 0;
+    }
+
+    .flydb-table-viewer-page,
+    .flydb-tables-page {
+        .flydb-hero {
+            padding: 24px;
+
+            .flydb-hero-content h1 {
+                font-size: 24px;
+            }
+
+            .flydb-hero-description p {
+                font-size: 14px;
+            }
+        }
+
+        .flydb-stat-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+
+            .flydb-stat-card {
+                padding: 20px;
+
+                strong {
+                    font-size: 28px;
+                }
+            }
+        }
+    }
+
+    .flydb-panel {
+        width: 100%;
+    }
+
+    .flydb-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+
+        .flydb-toolbar-left,
+        .flydb-toolbar-right {
+            width: 100%;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flydb-search-box {
+            width: 100%;
+
+            input {
+                width: 100%;
+            }
+        }
+    }
+
+    .flydb-pagination {
+        flex-direction: column;
+        gap: 16px;
+
+        .flydb-pagination-info {
+            text-align: center;
+        }
+
+        .flydb-pagination-controls {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+
+    .flydb-tables-page .flydb-table-list-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+
+        .flydb-search-input {
+            max-width: 100%;
+        }
+
+        .flydb-table-count {
+            text-align: center;
+        }
+    }
+}

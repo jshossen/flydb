@@ -1,0 +1,113 @@
+.flydb-data-table-container {
+    .flydb-table-wrapper {
+        overflow-x: auto;
+        max-height: 70vh;
+        border-radius: 8px;
+    }
+
+    .flydb-data-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: #f9fafb;
+            z-index: 10;
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            border-bottom: 2px solid #e5e7eb;
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: #f3f4f6;
+            }
+
+            &.sorted {
+                background: #eff6ff;
+                color: #1e40af;
+            }
+
+            .flydb-header-content {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+
+            .flydb-column-type {
+                display: block;
+                font-size: 11px;
+                font-weight: normal;
+                color: #646970;
+                margin-top: 2px;
+            }
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #111827;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            &:hover {
+                overflow: visible;
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
+            .null-value {
+                color: #999;
+                font-style: italic;
+            }
+
+            .flydb-highlight {
+                background: #fef3c7;
+                color: inherit;
+                padding: 0 2px;
+                border-radius: 2px;
+            }
+        }
+
+        tbody tr {
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: #f9fafb;
+            }
+        }
+    }
+
+    .flydb-table-loading,
+    .flydb-table-empty {
+        text-align: center;
+        padding: 80px 20px;
+        color: #6b7280;
+        font-size: 15px;
+    }
+
+    .flydb-hidden-columns-notice {
+        margin-top: 16px;
+        padding: 12px 16px;
+        background: #eff6ff;
+        border-left: 4px solid #667eea;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #1e40af;
+    }
+}

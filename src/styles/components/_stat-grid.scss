@@ -1,0 +1,50 @@
+.flydb-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 0 0 24px 0;
+
+    .flydb-stat-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px 18px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        overflow: hidden;
+
+        &:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .flydb-stat-label {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        strong {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 2px;
+            line-height: 1.1;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        small {
+            color: #9ca3af;
+            font-size: 11px;
+            display: block;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+    }
+}

@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import TableList from '../components/TableList';
+import Hero from '../components/Hero';
+import StatGrid from '../components/StatGrid';
 import flydbApi from '../api/flydbApi';
 
 const TablesPage = () => {
@@ -63,44 +65,37 @@ const TablesPage = () => {
         ];
     }, [tableStats]);
 
+    const statCards = useMemo(
+        () => [
+            {
+                label: __('Total tables', 'flydb'),
+                value: tableStats.totalTables.toLocaleString(),
+                subtext: __('Registered in this database', 'flydb'),
+            },
+            {
+                label: __('Rows indexed', 'flydb'),
+                value: tableStats.totalRows.toLocaleString(),
+                subtext: __('Across all tables', 'flydb'),
+            },
+            {
+                label: __('Storage size', 'flydb'),
+                value: tableStats.totalSizeFormatted,
+                subtext: __('Data + indexes', 'flydb'),
+            },
+        ],
+        [tableStats]
+    );
+
     return (
         <div className="flydb-tables-page">
-            <div className="flydb-hero">
-                <div className="flydb-hero-content">
-                    <p className="flydb-hero-label">{__('Database overview', 'flydb')}</p>
-                    <h1>{__('FlyDB Tables', 'flydb')}</h1>
-                    <div className="flydb-hero-meta">
-                        {heroMeta.map((item, index) => (
-                            <span key={index} className="flydb-chip">
-                                {item}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-                <div className="flydb-hero-description">
-                    <p>
-                        {__('Use the explorer to search, sort, and inspect every WordPress table with instant navigation into row-level data.', 'flydb')}
-                    </p>
-                </div>
-            </div>
+            <Hero
+                label={__('Database overview', 'flydb')}
+                title={__('FlyDB Tables', 'flydb')}
+                meta={heroMeta}
+                description={__('Use the explorer to search, sort, and inspect every WordPress table with instant navigation into row-level data.', 'flydb')}
+            />
 
-            <div className="flydb-stat-grid">
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Total tables', 'flydb')}</span>
-                    <strong>{tableStats.totalTables.toLocaleString()}</strong>
-                    <small>{__('Registered in this database', 'flydb')}</small>
-                </div>
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Rows indexed', 'flydb')}</span>
-                    <strong>{tableStats.totalRows.toLocaleString()}</strong>
-                    <small>{__('Across all tables', 'flydb')}</small>
-                </div>
-                <div className="flydb-stat-card">
-                    <span className="flydb-stat-label">{__('Storage size', 'flydb')}</span>
-                    <strong>{tableStats.totalSizeFormatted}</strong>
-                    <small>{__('Data + indexes', 'flydb')}</small>
-                </div>
-            </div>
+            <StatGrid stats={statCards} />
 
             {error && (
                 <div className="notice notice-error">

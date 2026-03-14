@@ -1,0 +1,111 @@
+.flydb-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.flydb-panel {
+    width: 400px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+
+    .flydb-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #dcdcde;
+
+        h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .flydb-panel-close {
+            padding: 5px;
+        }
+    }
+
+    .flydb-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+
+        .flydb-no-filters {
+            text-align: center;
+            padding: 40px 20px;
+            color: #646970;
+        }
+
+        .flydb-filters-list {
+            .flydb-filter-row {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 15px;
+                align-items: flex-start;
+
+                .components-base-control {
+                    margin-bottom: 0;
+                    flex: 1;
+                }
+
+                .components-select-control__input,
+                .components-text-control__input {
+                    height: 36px;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border-color: #d1d5db;
+                    font-size: 14px;
+                    line-height: 1.4;
+
+                    &:focus {
+                        border-color: #667eea;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    }
+                }
+
+                .components-select-control__input {
+                    padding-top: 6px;
+                    padding-bottom: 6px;
+                }
+
+                .flydb-filter-column {
+                    flex: 1.5;
+                }
+
+                .flydb-filter-operator {
+                    flex: 1;
+                }
+
+                .flydb-filter-value {
+                    flex: 2;
+                }
+
+                .flydb-remove-filter {
+                    flex-shrink: 0;
+                }
+            }
+        }
+
+        .flydb-filter-actions {
+            margin: 20px 0;
+        }
+    }
+
+    .flydb-panel-footer {
+        padding: 20px 0;
+        border-top: 1px solid #dcdcde;
+        display: flex;
+        gap: 10px;
+    }
+}
