@@ -42,12 +42,7 @@ class Plugin {
     }
     
     private function init_hooks() {
-        add_action('plugins_loaded', array($this, 'load_textdomain'));
         add_action('rest_api_init', array($this, 'register_rest_routes'));
-    }
-    
-    public function load_textdomain() {
-        load_plugin_textdomain('flydb', false, dirname(plugin_basename(FLYDB_PLUGIN_FILE)) . '/languages');
     }
     
     public function register_rest_routes() {

@@ -21,13 +21,13 @@ class Relationship_Detector {
         $row_id = isset($request['row_id']) ? absint($request['row_id']) : 0;
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
         }
         
         $table = $this->db_explorer->sanitize_table_name($table);
         
         if (!$this->db_explorer->table_exists($table)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
         }
         
         $relationships = $this->detect_table_relationships($table);

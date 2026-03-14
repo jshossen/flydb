@@ -77,7 +77,7 @@ A powerful, lightweight, and secure database explorer plugin for WordPress that 
 
 ```
 flydb/
-├── flydb.php                          # Main plugin file
+├── fly-db.php                         # Main plugin file
 ├── readme.txt                         # WordPress.org readme
 ├── README.md                          # Developer documentation
 ├── LICENSE                            # GPL v2 license

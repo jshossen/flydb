@@ -46,6 +46,7 @@ composer.lock
 *.swo
 *~
 /build/
+/dist/
 /temp/
 # OS
 .DS_Store

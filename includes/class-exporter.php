@@ -25,7 +25,7 @@ class Exporter {
         $limit = isset($request['limit']) ? absint($request['limit']) : 1000;
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
         }
         
         $limit = min($limit, $this->max_export_rows);
@@ -48,7 +48,7 @@ class Exporter {
         $columns = isset($data['columns']) ? $data['columns'] : array();
         
         if (empty($rows)) {
-            return new \WP_Error('no_data', __('No data to export', 'flydb'), array('status' => 400));
+            return new \WP_Error('no_data', __('No data to export', 'fly-db'), array('status' => 400));
         }
         
         switch ($format) {
@@ -65,7 +65,7 @@ class Exporter {
     }
     
     private function export_csv($rows, $table) {
-        $filename = sanitize_file_name($table . '_' . date('Y-m-d_H-i-s') . '.csv');
+        $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.csv');
         
         ob_start();
         $output = fopen('php://output', 'w');
@@ -78,7 +78,6 @@ class Exporter {
             }
         }
         
-        fclose($output);
         $csv_content = ob_get_clean();
         
         return rest_ensure_response(array(
@@ -91,7 +90,7 @@ class Exporter {
     }
     
     private function export_json($rows, $table) {
-        $filename = sanitize_file_name($table . '_' . date('Y-m-d_H-i-s') . '.json');
+        $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.json');
         
         $json_content = wp_json_encode($rows, JSON_PRETTY_PRINT);
         
@@ -106,10 +105,10 @@ class Exporter {
     
     private function export_xlsx($rows, $columns, $table) {
         if (!class_exists('ZipArchive')) {
-            return new \WP_Error('missing_extension', __('ZipArchive extension is required for XLSX export', 'flydb'), array('status' => 500));
+            return new \WP_Error('missing_extension', __('ZipArchive extension is required for XLSX export', 'fly-db'), array('status' => 500));
         }
         
-        $filename = sanitize_file_name($table . '_' . date('Y-m-d_H-i-s') . '.xlsx');
+        $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.xlsx');
         
         $xlsx_content = $this->generate_simple_xlsx($rows, $columns);
         
@@ -140,7 +139,7 @@ class Exporter {
         $zip->close();
         
         $content = file_get_contents($temp_file);
-        unlink($temp_file);
+        wp_delete_file($temp_file);
         
         return $content;
     }

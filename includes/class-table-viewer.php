@@ -35,13 +35,13 @@ class Table_Viewer {
         }
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
         }
         
         $table = $this->db_explorer->sanitize_table_name($table);
         
         if (!$this->db_explorer->table_exists($table)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
         }
         
         $per_page = min($per_page, $this->max_rows_per_page);

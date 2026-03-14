@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: FlyDB
- * Plugin URI: https://github.com/yourusername/flydb
+ * Plugin URI: https://github.com/jshossen/fly-db
  * Description: A powerful database explorer for WordPress that lets administrators browse tables, view relational data, filter results, paginate records, and export data easily.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://yourwebsite.com
+ * Author: Jakir Hossen
+ * Author URI: https://github.com/jshossen
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: flydb
+ * Text Domain: fly-db
  * Domain Path: /languages
  * Requires at least: 5.8
  * Requires PHP: 7.4
@@ -34,6 +34,6 @@ flydb_init();
 register_activation_hook(__FILE__, function() {
     if (version_compare(PHP_VERSION, '7.4', '<')) {
         deactivate_plugins(plugin_basename(__FILE__));
-        wp_die(__('FlyDB requires PHP 7.4 or higher.', 'flydb'));
+        wp_die(esc_html__('FlyDB requires PHP 7.4 or higher.', 'fly-db'));
     }
 });

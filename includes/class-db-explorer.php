@@ -55,7 +55,7 @@ class DB_Explorer {
         $table_name = $this->sanitize_table_name($table_name);
         
         if (!$this->table_exists($table_name)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
         }
         
         $columns = $this->get_table_columns($table_name);
