@@ -87,6 +87,12 @@ const ExportButton = ({ table, search = '', filters = [] }) => {
                     >
                         {__('Export as Excel', 'flydb')}
                     </MenuItem>
+                    <MenuItem
+                        icon="media-default"
+                        onClick={() => handleExport('xml')}
+                    >
+                        {__('Export as XML', 'flydb')}
+                    </MenuItem>
                 </MenuGroup>
             )}
         />

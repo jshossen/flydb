@@ -57,6 +57,9 @@ class Exporter {
                 
             case 'xlsx':
                 return $this->export_xlsx($rows, $columns, $table);
+
+            case 'xml':
+                return $this->export_xml($rows, $table);
                 
             case 'csv':
             default:
@@ -86,6 +89,47 @@ class Exporter {
             'filename' => $filename,
             'content' => base64_encode($csv_content),
             'mime_type' => 'text/csv',
+        ));
+    }
+
+    private function export_xml($rows, $table) {
+        if (!class_exists('\DOMDocument')) {
+            return new \WP_Error('missing_extension', __('DOMDocument extension is required for XML export', 'flydb'), array('status' => 500));
+        }
+
+        $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.xml');
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+
+        $root = $dom->createElement('dataset');
+        $root->setAttribute('table', $table);
+        $dom->appendChild($root);
+
+        foreach ($rows as $row_index => $row) {
+            $row_node = $dom->createElement('row');
+            $row_node->setAttribute('index', (string) ($row_index + 1));
+
+            foreach ($row as $column => $value) {
+                $column_node = $dom->createElement('column');
+                $column_node->setAttribute('name', $column);
+
+                $column_value = $dom->createCDATASection((string) $value);
+                $column_node->appendChild($column_value);
+                $row_node->appendChild($column_node);
+            }
+
+            $root->appendChild($row_node);
+        }
+
+        $xml_content = $dom->saveXML();
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'format' => 'xml',
+            'filename' => $filename,
+            'content' => base64_encode($xml_content),
+            'mime_type' => 'application/xml',
         ));
     }
     
