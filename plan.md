@@ -3,23 +3,23 @@
 Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once completed.
 
 ## Phase 1 – Enhanced Search & Filtering (Weeks 1-2)
-- [ ] Week 1: Global search upgrades
-  - [ ] Implement debounced global search across columns
-  - [ ] Add search-result highlighting in table rows
-  - [ ] Provide recent search history dropdown
-- [ ] Week 1-2: Smart filters
-  - [ ] Add date range picker + quick presets (Today, Last 7 Days, This Month)
-  - [ ] Support numeric range (`min/max`) filtering
-  - [ ] Introduce `IN/NOT IN` multi-value filters and NULL toggles
+- [x] Week 1: Global search upgrades
+  - [x] Implement debounced global search across columns
+  - [x] Add search-result highlighting in table rows
+  - [x] Provide recent search history dropdown
+- [x] Week 1-2: Smart filters
+  - [x] Add date range picker + quick presets (Today, Last 7 Days, This Month)
+  - [x] Support numeric range (`min/max`) filtering
+  - [x] Introduce `IN/NOT IN` multi-value filters and NULL toggles
 - [ ] Week 2: Saved filter presets
   - [ ] Save named filter combinations per table
   - [ ] Manage (rename/delete) presets
   - [ ] Quick-apply dropdown for presets
 
 ## Phase 2 – Table Relationships (Weeks 3-4)
-- [ ] Week 3: Relationship detection
-  - [ ] Parse foreign keys + naming heuristics for implicit relationships
-  - [ ] Store relationship metadata for reuse
+- [x] Week 3: Relationship detection
+  - [x] Parse foreign keys + naming heuristics for implicit relationships
+  - [x] Store relationship metadata for reuse
 - [ ] Week 3-4: Visualization
   - [ ] Display relationship badges/counts on table list
   - [ ] Show relationship panel inside table viewer with quick navigation
@@ -29,8 +29,8 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
   - [ ] One-click navigation with pre-applied filters
 
 ## Phase 3 – Column Management (Weeks 5-6)
-- [ ] Week 5: Column visibility
-  - [ ] Column selector UI (show/hide + reset)
+- [x] Week 5: Column visibility
+  - [x] Column selector UI (show/hide + reset)
   - [ ] Persist preferences per table
 - [ ] Week 5-6: Reordering
   - [ ] Drag-and-drop column headers
@@ -40,8 +40,8 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
   - [ ] Save column widths per table
 
 ## Phase 4 – Export Enhancements (Weeks 7-8)
-- [ ] Week 7: Multiple export formats
-  - [ ] JSON export
+- [x] Week 7: Multiple export formats
+  - [x] JSON export
   - [ ] XML export
   - [ ] SQL INSERT export
 - [ ] Week 7-8: Export UX

@@ -40,13 +40,43 @@ const TableViewerPage = () => {
     const [filters, setFilters] = useState([]);
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
+    const [panelWidth, setPanelWidth] = useState(400);
     const skipDebounceRef = useRef(false);
+    const isResizingRef = useRef(false);
 
     useEffect(() => {
         if (tableName) {
             loadTableData();
         }
     }, [tableName, currentPage, perPage, searchQuery, sortColumn, sortOrder, filters]);
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isResizingRef.current) return;
+            
+            const newWidth = window.innerWidth - e.clientX;
+            const minWidth = 400;
+            const maxWidth = window.innerWidth * 0.8;
+            
+            setPanelWidth(Math.max(minWidth, Math.min(newWidth, maxWidth)));
+        };
+
+        const handleMouseUp = () => {
+            if (isResizingRef.current) {
+                isResizingRef.current = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, []);
 
     const persistHistory = useCallback(
         (history) => {
@@ -417,7 +447,20 @@ const TableViewerPage = () => {
 
             {showFilterPanel && (
                 <div className="flydb-panel-overlay" onClick={() => setShowFilterPanel(false)}>
-                    <div className="flydb-panel" onClick={(e) => e.stopPropagation()}>
+                    <div 
+                        className="flydb-panel" 
+                        style={{ width: `${panelWidth}px` }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div 
+                            className="flydb-panel-resize-handle"
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                isResizingRef.current = true;
+                                document.body.style.cursor = 'ew-resize';
+                                document.body.style.userSelect = 'none';
+                            }}
+                        />
                         <FilterBuilder
                             columns={columns}
                             filters={filters}

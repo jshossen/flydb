@@ -175,10 +175,11 @@ class Table_Viewer {
                     break;
                     
                 case 'BETWEEN':
-                    if (is_array($value) && count($value) === 2) {
+                    $range_values = is_array($value) ? $value : explode(',', $value);
+                    if (count($range_values) === 2) {
                         $conditions[] = "`{$column}` BETWEEN %s AND %s";
-                        $where_values[] = $value[0];
-                        $where_values[] = $value[1];
+                        $where_values[] = trim($range_values[0]);
+                        $where_values[] = trim($range_values[1]);
                     }
                     break;
                     
