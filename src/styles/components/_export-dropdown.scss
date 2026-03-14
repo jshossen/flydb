@@ -11,5 +11,83 @@
             align-items: center;
             gap: 8px;
         }
+
+        .flydb-export-scope-toggle {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ddd;
+
+            .components-toggle-control {
+                margin-bottom: 0;
+
+                .components-base-control__field {
+                    margin-bottom: 0;
+                }
+
+                .components-toggle-control__label {
+                    font-weight: 500;
+                }
+
+                .components-base-control__help {
+                    font-size: 12px;
+                    margin-top: 4px;
+                    color: #757575;
+                }
+            }
+        }
+
+        .flydb-column-selector {
+            padding: 12px 16px;
+            max-height: 300px;
+            overflow-y: auto;
+
+            .flydb-column-selector-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #e0e0e0;
+
+                .flydb-column-selector-title {
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: #1e1e1e;
+                }
+
+                .flydb-column-selector-actions {
+                    display: flex;
+                    gap: 8px;
+
+                    .components-button {
+                        font-size: 12px;
+                        padding: 0 4px;
+                        height: auto;
+                        min-height: auto;
+                    }
+                }
+            }
+
+            .flydb-column-selector-list {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .components-checkbox-control {
+                    margin-bottom: 0;
+
+                    .components-checkbox-control__input-container {
+                        margin-right: 8px;
+                    }
+
+                    .components-base-control__field {
+                        margin-bottom: 0;
+                    }
+
+                    label {
+                        font-size: 13px;
+                    }
+                }
+            }
+        }
     }
 }

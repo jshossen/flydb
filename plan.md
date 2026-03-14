@@ -42,8 +42,8 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
 ## Phase 4 – Export Enhancements (Weeks 7-8)
 - [x] Week 7: Multiple export formats
   - [x] JSON export
-  - [ ] XML export
-  - [ ] SQL INSERT export
+  - [x] XML export
+  - [ ] SQL INSERT export (later)
 - [ ] Week 7-8: Export UX
   - [ ] Progress indicator + chunked processing for large exports
   - [ ] Export current view vs entire dataset toggle

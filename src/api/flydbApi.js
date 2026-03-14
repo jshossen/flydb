@@ -58,7 +58,7 @@ export const flydbApi = {
     /**
      * Export table data
      */
-    exportData: async ({ table, format = 'csv', search = '', filters = [], limit = 10000 }) => {
+    exportData: async ({ table, format = 'csv', search = '', filters = [], columns = [], limit = 10000, offset = 0 }) => {
         try {
             const response = await apiFetch({
                 path: `/${API_NAMESPACE}/export`,
@@ -68,7 +68,9 @@ export const flydbApi = {
                     format,
                     search,
                     filters,
+                    columns,
                     limit,
+                    offset,
                 },
             });
 

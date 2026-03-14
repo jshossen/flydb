@@ -23,6 +23,8 @@ class Exporter {
         $filters = isset($request['filters']) ? $request['filters'] : array();
         $search = isset($request['search']) ? sanitize_text_field($request['search']) : '';
         $limit = isset($request['limit']) ? absint($request['limit']) : 1000;
+        $offset = isset($request['offset']) ? absint($request['offset']) : 0;
+        $selected_columns = isset($request['columns']) ? $request['columns'] : array();
         
         if (empty($table)) {
             return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
@@ -30,9 +32,11 @@ class Exporter {
         
         $limit = min($limit, $this->max_export_rows);
         
+        $page = $offset > 0 ? floor($offset / $limit) + 1 : 1;
+        
         $data_request = new \WP_REST_Request('GET', '/flydb/v1/table-data');
         $data_request->set_param('table', $table);
-        $data_request->set_param('page', 1);
+        $data_request->set_param('page', $page);
         $data_request->set_param('per_page', $limit);
         $data_request->set_param('search', $search);
         $data_request->set_param('filters', $filters);
@@ -46,6 +50,18 @@ class Exporter {
         $data = $response->get_data();
         $rows = isset($data['rows']) ? $data['rows'] : array();
         $columns = isset($data['columns']) ? $data['columns'] : array();
+        
+        // Filter columns if specific columns are requested
+        if (!empty($selected_columns) && is_array($selected_columns)) {
+            $columns = array_filter($columns, function($col) use ($selected_columns) {
+                return in_array($col['name'], $selected_columns);
+            });
+            
+            // Filter row data to only include selected columns
+            $rows = array_map(function($row) use ($selected_columns) {
+                return array_intersect_key($row, array_flip($selected_columns));
+            }, $rows);
+        }
         
         if (empty($rows)) {
             return new \WP_Error('no_data', __('No data to export', 'fly-db'), array('status' => 400));

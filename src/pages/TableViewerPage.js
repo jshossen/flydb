@@ -392,6 +392,8 @@ const TableViewerPage = () => {
                                 table={tableName}
                                 search={searchQuery}
                                 filters={filters}
+                                totalRows={totalRows}
+                                columns={columns}
                             />
                         </div>
                     </div>
