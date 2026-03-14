@@ -69,6 +69,12 @@ class Plugin {
             'callback' => array($this->relationship_detector, 'get_relationships'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
+
+        register_rest_route('flydb/v1', '/relationships/all', array(
+            'methods' => 'GET',
+            'callback' => array($this->relationship_detector, 'get_all_relationships'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
     }
     
     public function check_permissions() {

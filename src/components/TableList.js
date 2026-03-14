@@ -1,14 +1,37 @@
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Spinner, Card, CardBody } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
 import { FormInput, FormButton } from './FormControls';
+import flydbApi from '../api/flydbApi';
 
 const TableList = ({ tables = [], isLoading = false }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortColumn, setSortColumn] = useState('name');
     const [sortOrder, setSortOrder] = useState('ASC');
+    const [relationships, setRelationships] = useState({});
+    const [loadingRelationships, setLoadingRelationships] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (tables.length > 0) {
+            loadRelationships();
+        }
+    }, [tables]);
+
+    const loadRelationships = async () => {
+        setLoadingRelationships(true);
+        try {
+            const response = await flydbApi.getAllRelationships();
+            if (response.success) {
+                setRelationships(response.relationships);
+            }
+        } catch (error) {
+            console.error('Failed to load relationships', error);
+        } finally {
+            setLoadingRelationships(false);
+        }
+    };
 
     const handleSort = (column) => {
         if (sortColumn === column) {
@@ -121,17 +144,33 @@ const TableList = ({ tables = [], isLoading = false }) => {
                     {sortedTables.map((table) => (
                         <tr key={table.name}>
                             <td className="table-name">
-                                <strong>
-                                    <a
-                                        href={`#/table/${table.name}`}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleTableClick(table.name);
-                                        }}
-                                    >
-                                        {table.name}
-                                    </a>
-                                </strong>
+                                <div className="flydb-table-name-wrapper">
+                                    <strong>
+                                        <a
+                                            href={`#/table/${table.name}`}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleTableClick(table.name);
+                                            }}
+                                        >
+                                            {table.name}
+                                        </a>
+                                    </strong>
+                                    {relationships[table.name] && relationships[table.name].count > 0 && (
+                                        <div className="flydb-relationship-badges">
+                                            {relationships[table.name].belongs_to > 0 && (
+                                                <span className="flydb-badge flydb-badge-belongs-to" title={__('Belongs to relationships', 'flydb')}>
+                                                    ↑ {relationships[table.name].belongs_to}
+                                                </span>
+                                            )}
+                                            {relationships[table.name].has_many > 0 && (
+                                                <span className="flydb-badge flydb-badge-has-many" title={__('Has many relationships', 'flydb')}>
+                                                    ↓ {relationships[table.name].has_many}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </td>
                             <td>{table.engine || '-'}</td>
                             <td className="num">{table.rows?.toLocaleString() || '0'}</td>

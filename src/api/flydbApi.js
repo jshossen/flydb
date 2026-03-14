@@ -103,6 +103,23 @@ export const flydbApi = {
             throw error;
         }
     },
+
+    /**
+     * Get all table relationships (counts)
+     */
+    getAllRelationships: async () => {
+        try {
+            const response = await apiFetch({
+                path: `/${API_NAMESPACE}/relationships/all`,
+                method: 'GET',
+            });
+
+            return response;
+        } catch (error) {
+            console.error('Error fetching all relationships:', error);
+            throw error;
+        }
+    },
 };
 
 export default flydbApi;

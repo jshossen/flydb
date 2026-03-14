@@ -2,10 +2,11 @@ import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/el
 import { __ } from '@wordpress/i18n';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
-import { arrowLeft, filter as filterIcon, postDate } from '@wordpress/icons';
+import { arrowLeft, filter as filterIcon, postDate, people } from '@wordpress/icons';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
 import FilterBuilder from '../components/FilterBuilder';
+import RelationshipPanel from '../components/RelationshipPanel';
 import ExportButton from '../components/ExportButton';
 import flydbApi from '../api/flydbApi';
 import Hero from '../components/Hero';
@@ -40,6 +41,7 @@ const TableViewerPage = () => {
     const [filters, setFilters] = useState([]);
 
     const [showFilterPanel, setShowFilterPanel] = useState(false);
+    const [showRelationshipPanel, setShowRelationshipPanel] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
     const skipDebounceRef = useRef(false);
     const isResizingRef = useRef(false);
@@ -362,13 +364,26 @@ const TableViewerPage = () => {
 
                             <Button
                                 icon={filterIcon}
-                                onClick={() => setShowFilterPanel(!showFilterPanel)}
+                                onClick={() => {
+                                    setShowFilterPanel(!showFilterPanel);
+                                    setShowRelationshipPanel(false);
+                                }}
                                 variant="secondary"
                             >
                                 {__('Filters', 'flydb')}
                                 {filters.length > 0 && (
                                     <span className="flydb-filter-badge">{filters.length}</span>
                                 )}
+                            </Button>
+                            <Button
+                                icon={people}
+                                onClick={() => {
+                                    setShowRelationshipPanel(!showRelationshipPanel);
+                                    setShowFilterPanel(false);
+                                }}
+                                variant="secondary"
+                            >
+                                {__('Relationships', 'flydb')}
                             </Button>
                         </div>
 
@@ -467,6 +482,30 @@ const TableViewerPage = () => {
                             onFiltersChange={handleFiltersChange}
                             onClose={() => setShowFilterPanel(false)}
                             tableName={tableName}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {showRelationshipPanel && (
+                <div className="flydb-panel-overlay" onClick={() => setShowRelationshipPanel(false)}>
+                    <div 
+                        className="flydb-panel" 
+                        style={{ width: `${panelWidth}px` }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div 
+                            className="flydb-panel-resize-handle"
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                isResizingRef.current = true;
+                                document.body.style.cursor = 'ew-resize';
+                                document.body.style.userSelect = 'none';
+                            }}
+                        />
+                        <RelationshipPanel
+                            tableName={tableName}
+                            onClose={() => setShowRelationshipPanel(false)}
                         />
                     </div>
                 </div>

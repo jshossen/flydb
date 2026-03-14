@@ -20,9 +20,9 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
 - [x] Week 3: Relationship detection
   - [x] Parse foreign keys + naming heuristics for implicit relationships
   - [x] Store relationship metadata for reuse
-- [ ] Week 3-4: Visualization
-  - [ ] Display relationship badges/counts on table list
-  - [ ] Show relationship panel inside table viewer with quick navigation
+- [x] Week 3-4: Visualization
+  - [x] Display relationship badges/counts on table list
+  - [x] Show relationship panel inside table viewer with quick navigation
   - [ ] (Optional) Render relationship graph/diagram
 - [ ] Week 4: Related data preview
   - [ ] Expandable related-record previews
