@@ -1,6 +1,6 @@
 import { useState, useEffect } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Dropdown, MenuGroup, MenuItem, Modal, ProgressBar, ToggleControl, CheckboxControl } from '@wordpress/components';
+import { Button, Dropdown, MenuGroup, MenuItem, Modal, ProgressBar, ToggleControl, CheckboxControl, TextControl, SelectControl } from '@wordpress/components';
 import { download, settings } from '@wordpress/icons';
 import flydbApi from '../api/flydbApi';
 
@@ -13,6 +13,12 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
     const [exportEntireDataset, setExportEntireDataset] = useState(false);
     const [selectedColumns, setSelectedColumns] = useState([]);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
+    const [savedPresets, setSavedPresets] = useState([]);
+    const [showSavePresetModal, setShowSavePresetModal] = useState(false);
+    const [presetName, setPresetName] = useState('');
+    const [presetFormat, setPresetFormat] = useState('csv');
+
+    const getPresetStorageKey = (tableName) => `flydb_export_presets_${tableName}`;
 
     useEffect(() => {
         if (columns.length > 0) {
@@ -20,30 +26,98 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
         }
     }, [columns]);
 
-    const handleExport = async (format) => {
+    useEffect(() => {
+        if (!table || typeof window === 'undefined') {
+            setSavedPresets([]);
+            return;
+        }
+
+        try {
+            const stored = window.localStorage.getItem(getPresetStorageKey(table));
+            setSavedPresets(stored ? JSON.parse(stored) : []);
+        } catch (error) {
+            console.error('Failed to load export presets', error);
+            setSavedPresets([]);
+        }
+    }, [table]);
+
+    const persistPresets = (presets) => {
+        if (!table || typeof window === 'undefined') {
+            return;
+        }
+
+        try {
+            window.localStorage.setItem(getPresetStorageKey(table), JSON.stringify(presets));
+        } catch (error) {
+            console.error('Failed to save export presets', error);
+        }
+    };
+
+    const handleSavePreset = () => {
+        if (!presetName.trim()) {
+            return;
+        }
+
+        const newPreset = {
+            id: Date.now().toString(),
+            name: presetName.trim(),
+            format: presetFormat,
+            columns: selectedColumns,
+            exportEntireDataset,
+            createdAt: new Date().toISOString(),
+        };
+
+        const updated = [...savedPresets, newPreset];
+        setSavedPresets(updated);
+        persistPresets(updated);
+        setPresetName('');
+        setPresetFormat('csv');
+        setShowSavePresetModal(false);
+    };
+
+    const handleDeletePreset = (presetId) => {
+        const updated = savedPresets.filter((preset) => preset.id !== presetId);
+        setSavedPresets(updated);
+        persistPresets(updated);
+    };
+
+    const handleApplyPreset = (preset) => {
+        setSelectedColumns(preset.columns);
+        setExportEntireDataset(preset.exportEntireDataset);
+        handleExport(preset.format, {
+            columns: preset.columns,
+            exportEntireDataset: preset.exportEntireDataset,
+        });
+    };
+
+    const handleExport = async (format, overrideOptions = {}) => {
+        const columnsToUse = overrideOptions.columns ?? selectedColumns;
+        const useEntireDataset = overrideOptions.exportEntireDataset ?? exportEntireDataset;
+        const totalCount = overrideOptions.totalRows ?? totalRows;
+
         setIsExporting(true);
 
-        const shouldChunk = totalRows > CHUNK_SIZE;
+        const shouldChunk = totalCount > CHUNK_SIZE;
 
         if (shouldChunk) {
             setShowProgress(true);
-            await handleChunkedExport(format);
+            await handleChunkedExport(format, columnsToUse, useEntireDataset, totalCount);
         } else {
-            await handleSimpleExport(format);
+            await handleSimpleExport(format, columnsToUse, useEntireDataset);
         }
 
         setIsExporting(false);
         setShowProgress(false);
     };
 
-    const handleSimpleExport = async (format) => {
+    const handleSimpleExport = async (format, columnsToUse, useEntireDataset) => {
         try {
             const response = await flydbApi.exportData({
                 table,
                 format,
-                search: exportEntireDataset ? '' : search,
-                filters: exportEntireDataset ? [] : filters,
-                columns: selectedColumns,
+                search: useEntireDataset ? '' : search,
+                filters: useEntireDataset ? [] : filters,
+                columns: columnsToUse,
                 limit: 10000,
             });
 
@@ -56,9 +130,9 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
         }
     };
 
-    const handleChunkedExport = async (format) => {
+    const handleChunkedExport = async (format, columnsToUse, useEntireDataset, totalCount) => {
         try {
-            const chunks = Math.ceil(totalRows / CHUNK_SIZE);
+            const chunks = Math.ceil(totalCount / CHUNK_SIZE);
             const allData = [];
             let filename = '';
             let mimeType = '';
@@ -66,17 +140,17 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
             for (let i = 0; i < chunks; i++) {
                 const offset = i * CHUNK_SIZE;
                 setProgress({
-                    current: Math.min((i + 1) * CHUNK_SIZE, totalRows),
-                    total: totalRows,
+                    current: Math.min((i + 1) * CHUNK_SIZE, totalCount),
+                    total: totalCount,
                     percent: Math.round(((i + 1) / chunks) * 100),
                 });
 
                 const response = await flydbApi.exportData({
                     table,
                     format,
-                    search: exportEntireDataset ? '' : search,
-                    filters: exportEntireDataset ? [] : filters,
-                    columns: selectedColumns,
+                    search: useEntireDataset ? '' : search,
+                    filters: useEntireDataset ? [] : filters,
+                    columns: columnsToUse,
                     limit: CHUNK_SIZE,
                     offset,
                 });
@@ -168,6 +242,54 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
                 )}
                 renderContent={() => (
                     <>
+                        <MenuGroup>
+                            <div className="flydb-export-presets">
+                                <div className="flydb-export-presets-header">
+                                    <span>{__('Presets', 'flydb')}</span>
+                                    <Button
+                                        variant="link"
+                                        isSmall
+                                        onClick={() => setShowSavePresetModal(true)}
+                                    >
+                                        {__('Save current', 'flydb')}
+                                    </Button>
+                                </div>
+                                {savedPresets.length === 0 ? (
+                                    <p className="flydb-export-presets-empty">
+                                        {__('No presets yet. Configure your export and save it for quick access.', 'flydb')}
+                                    </p>
+                                ) : (
+                                    <div className="flydb-export-presets-list">
+                                        {savedPresets.map((preset) => (
+                                            <div key={preset.id} className="flydb-export-preset-item">
+                                                <button
+                                                    type="button"
+                                                    className="flydb-export-preset-run"
+                                                    onClick={() => handleApplyPreset(preset)}
+                                                    disabled={isExporting}
+                                                >
+                                                    <span className="flydb-export-preset-name">{preset.name}</span>
+                                                    <span className="flydb-export-preset-meta">
+                                                        {preset.format.toUpperCase()} · {preset.exportEntireDataset ? __('All rows', 'flydb') : __('Current view', 'flydb')}
+                                                    </span>
+                                                </button>
+                                                <Button
+                                                    icon="trash"
+                                                    label={__('Delete preset', 'flydb')}
+                                                    isDestructive
+                                                    className="flydb-export-preset-delete"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleDeletePreset(preset.id);
+                                                    }}
+                                                    disabled={isExporting}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </MenuGroup>
                         <MenuGroup>
                             <div className="flydb-export-scope-toggle">
                                 <ToggleControl
@@ -274,6 +396,51 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
                     <p className="flydb-export-progress-note">
                         {__('Please wait while we process your export. This may take a moment for large datasets.', 'flydb')}
                     </p>
+                </Modal>
+            )}
+
+            {showSavePresetModal && (
+                <Modal
+                    title={__('Save Export Preset', 'flydb')}
+                    onRequestClose={() => setShowSavePresetModal(false)}
+                >
+                    <TextControl
+                        label={__('Preset name', 'flydb')}
+                        value={presetName}
+                        onChange={setPresetName}
+                        placeholder={__('e.g. Marketing CSV', 'flydb')}
+                    />
+                    <SelectControl
+                        label={__('Format', 'flydb')}
+                        value={presetFormat}
+                        options={[
+                            { label: __('CSV', 'flydb'), value: 'csv' },
+                            { label: __('JSON', 'flydb'), value: 'json' },
+                            { label: __('Excel (XLSX)', 'flydb'), value: 'xlsx' },
+                            { label: __('XML', 'flydb'), value: 'xml' },
+                        ]}
+                        onChange={setPresetFormat}
+                    />
+                    <p className="flydb-export-preset-summary">
+                        {exportEntireDataset
+                            ? __('This preset will export the entire dataset.', 'flydb')
+                            : __('This preset will export only the current filters/search results.', 'flydb')}
+                    </p>
+                    <div className="flydb-export-preset-actions">
+                        <Button
+                            variant="primary"
+                            onClick={handleSavePreset}
+                            disabled={!presetName.trim() || selectedColumns.length === 0}
+                        >
+                            {__('Save preset', 'flydb')}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setShowSavePresetModal(false)}
+                        >
+                            {__('Cancel', 'flydb')}
+                        </Button>
+                    </div>
                 </Modal>
             )}
         </>

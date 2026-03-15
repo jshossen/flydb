@@ -42,10 +42,11 @@ FlyDB is a lightweight, secure, and scalable WordPress plugin that provides admi
 * Smart foreign key detection
 
 **Data Export**
-* Export filtered results to CSV, JSON, or Excel (XLSX)
-* Export up to 10,000 rows per export
-* Preserve filters and search criteria in exports
-* Download files directly from browser
+* Export filtered results to CSV, JSON, Excel (XLSX), or XML
+* Chunked processing with progress indicator for large datasets (10k+ rows)
+* Toggle between exporting the current view or the entire dataset
+* Include/exclude columns and save reusable export presets
+* Preserve filters/search criteria and download directly from the browser
 
 **Security & Performance**
 * Read-only access (V1 - no write/delete operations)

@@ -48,8 +48,8 @@ Use this checklist to track weekly/phase progress. Mark tasks as `[x]` once comp
   - [x] Progress indicator + chunked processing for large exports
   - [x] Export current view vs entire dataset toggle
   - [x] Column include/exclude selection
-- [ ] Week 8: Export presets
-  - [ ] Save/export presets with format + column + row scope (later)
+- [x] Week 8: Export presets
+  - [x] Save/export presets with format + column + row scope
 
 ## Phase 5 – Performance Optimization (Weeks 9-10)
 - [ ] Week 9: Virtual scrolling
