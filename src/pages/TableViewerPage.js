@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/el
 import { __ } from '@wordpress/i18n';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
-import { arrowLeft, filter as filterIcon, postDate, people } from '@wordpress/icons';
+import { arrowLeft, filter as filterIcon, postDate, people, commentContent } from '@wordpress/icons';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
 import FilterBuilder from '../components/FilterBuilder';
@@ -10,6 +10,7 @@ import RelationshipPanel from '../components/RelationshipPanel';
 import ExportButton from '../components/ExportButton';
 import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
 import KeyboardShortcutsButton from '../components/KeyboardShortcutsButton';
+import ChatPanel from '../components/ChatPanel';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 import Hero from '../components/Hero';
@@ -47,6 +48,7 @@ const TableViewerPage = () => {
     const [showRelationshipPanel, setShowRelationshipPanel] = useState(false);
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
+    const [showChatPanel, setShowChatPanel] = useState(false);
     const skipDebounceRef = useRef(false);
     const isResizingRef = useRef(false);
     const searchInputRef = useRef(null);
@@ -313,208 +315,276 @@ const TableViewerPage = () => {
 
     return (
         <div className="flydb-table-viewer-page">
-            <Hero
-                label={__('Table', 'flydb')}
-                title={tableName}
-                meta={heroMeta}
-                description={__('Explore structure, filter data, and export this table without touching SQL. Updates happen in real-time over the REST API.', 'flydb')}
-            >
-                <Button
-                    icon={arrowLeft}
-                    onClick={handleBackToTables}
-                    // variant="secondary"
-                    className="flydb-back-button"
-                >
-                    {__('Back to Tables', 'flydb')}
-                </Button>
-            </Hero>
+            <div className="flydb-page-body">
+                <div className="flydb-main-column">
+                    <Hero
+                        label={__('Table', 'flydb')}
+                        title={tableName}
+                        meta={heroMeta}
+                        description={__('Explore structure, filter data, and export this table without touching SQL. Updates happen in real-time over the REST API.', 'flydb')}
+                    >
+                        <Button
+                            icon={arrowLeft}
+                            onClick={handleBackToTables}
+                            // variant="secondary"
+                            className="flydb-back-button"
+                        >
+                            {__('Back to Tables', 'flydb')}
+                        </Button>
+                    </Hero>
 
-            {error && (
-                <Notice status="error" isDismissible={false}>
-                    {error}
-                </Notice>
-            )}
+                    {error && (
+                        <Notice status="error" isDismissible={false}>
+                            {error}
+                        </Notice>
+                    )}
 
-            <StatGrid stats={statCards} />
+                    <StatGrid stats={statCards} />
 
-            <Card className="flydb-card">
-                <CardBody className="flydb-toolbar-card">
-                    <div className="flydb-toolbar">
-                        <div className="flydb-toolbar-left">
-                            <div className="flydb-search-box">
-                                <FormInput
-                                    ref={searchInputRef}
-                                    placeholder={__('Search...', 'flydb')}
-                                    value={searchInput}
-                                    onChange={setSearchInput}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleSearch();
-                                        }
-                                    }}
-                                />
-                                <FormButton variant="secondary" onClick={handleSearch}>
-                                    {__('Search', 'flydb')}
-                                </FormButton>
-                                <Dropdown
-                                    className="flydb-search-history"
-                                    position="bottom right"
-                                    renderToggle={({ isOpen, onToggle }) => (
-                                        <Button
-                                            variant="secondary"
-                                            icon={postDate}
-                                            onClick={onToggle}
-                                            aria-expanded={isOpen}
-                                        >
-                                            {__('History', 'flydb')}
-                                        </Button>
-                                    )}
-                                    renderContent={({ onClose }) => (
-                                        <div className="flydb-search-history__menu">
-                                            <MenuGroup label={__('Recent searches', 'flydb')}>
-                                                {searchHistory.length === 0 && (
-                                                    <div className="flydb-search-history__empty">
-                                                        {__('No recent searches yet.', 'flydb')}
-                                                    </div>
-                                                )}
-                                                {searchHistory.map((term) => (
-                                                    <MenuItem
-                                                        key={term}
-                                                        onClick={() => {
-                                                            handleHistorySelect(term);
-                                                            onClose();
-                                                        }}
-                                                    >
-                                                        {term}
-                                                    </MenuItem>
-                                                ))}
-                                            </MenuGroup>
-                                            {searchHistory.length > 0 && (
-                                                <MenuItem
-                                                    isDestructive
-                                                    onClick={() => {
-                                                        handleClearHistory();
-                                                        onClose();
-                                                    }}
+                    <Card className="flydb-card">
+                        <CardBody className="flydb-toolbar-card">
+                            <div className="flydb-toolbar">
+                                <div className="flydb-toolbar-left">
+                                    <div className="flydb-search-box">
+                                        <FormInput
+                                            ref={searchInputRef}
+                                            placeholder={__('Search...', 'flydb')}
+                                            value={searchInput}
+                                            onChange={setSearchInput}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleSearch();
+                                                }
+                                            }}
+                                        />
+                                        <FormButton variant="secondary" onClick={handleSearch}>
+                                            {__('Search', 'flydb')}
+                                        </FormButton>
+                                        <Dropdown
+                                            className="flydb-search-history"
+                                            position="bottom right"
+                                            renderToggle={({ isOpen, onToggle }) => (
+                                                <Button
+                                                    variant="secondary"
+                                                    icon={postDate}
+                                                    onClick={onToggle}
+                                                    aria-expanded={isOpen}
                                                 >
-                                                    {__('Clear history', 'flydb')}
-                                                </MenuItem>
+                                                    {__('History', 'flydb')}
+                                                </Button>
                                             )}
+                                            renderContent={({ onClose }) => (
+                                                <div className="flydb-search-history__menu">
+                                                    <MenuGroup label={__('Recent searches', 'flydb')}>
+                                                        {searchHistory.length === 0 && (
+                                                            <div className="flydb-search-history__empty">
+                                                                {__('No recent searches yet.', 'flydb')}
+                                                            </div>
+                                                        )}
+                                                        {searchHistory.map((term) => (
+                                                            <MenuItem
+                                                                key={term}
+                                                                onClick={() => {
+                                                                    handleHistorySelect(term);
+                                                                    onClose();
+                                                                }}
+                                                            >
+                                                                {term}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </MenuGroup>
+                                                    {searchHistory.length > 0 && (
+                                                        <MenuItem
+                                                            isDestructive
+                                                            onClick={() => {
+                                                                handleClearHistory();
+                                                                onClose();
+                                                            }}
+                                                        >
+                                                            {__('Clear history', 'flydb')}
+                                                        </MenuItem>
+                                                    )}
+                                                </div>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <Button
+                                        icon={filterIcon}
+                                        onClick={() => {
+                                            setShowFilterPanel(!showFilterPanel);
+                                            setShowRelationshipPanel(false);
+                                        }}
+                                        variant="secondary"
+                                    >
+                                        {__('Filters', 'flydb')}
+                                        {filters.length > 0 && (
+                                            <span className="flydb-filter-badge">{filters.length}</span>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        icon={people}
+                                        onClick={() => {
+                                            setShowRelationshipPanel(!showRelationshipPanel);
+                                            setShowFilterPanel(false);
+                                        }}
+                                        variant="secondary"
+                                    >
+                                        {__('Relationships', 'flydb')}
+                                    </Button>
+                                </div>
+
+                                <div className="flydb-toolbar-right">
+                                    <KeyboardShortcutsButton onClick={() => setShowKeyboardHelp(true)} />
+                                    <ExportButton
+                                        table={tableName}
+                                        search={searchQuery}
+                                        filters={filters}
+                                        totalRows={totalRows}
+                                        columns={columns}
+                                    />
+                                </div>
+                            </div>
+                        </CardBody>
+                    </Card>
+
+                    {filters.length > 0 && (
+                        <div className="flydb-active-filters">
+                            <strong>{__('Active filters:', 'flydb')}</strong>
+                            {filters.map((filter, index) => (
+                                <span key={index} className="flydb-filter-tag">
+                                    {filter.column} {filter.operator} {filter.value}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {columnPreview.length > 0 && (
+                        <Card className="flydb-columns-card">
+                            <CardBody>
+                                <div className="flydb-columns-card__header">
+                                    <h3>{__('Column blueprint', 'flydb')}</h3>
+                                    <span>{columnCount} {columnCount === 1 ? __('field', 'flydb') : __('fields', 'flydb')}</span>
+                                </div>
+                                <div className="flydb-columns-chip-group">
+                                    {columnPreview.map((column) => (
+                                        <div key={column.name} className="flydb-column-chip">
+                                            <span className="flydb-column-name">{column.name}</span>
+                                            <span className="flydb-column-type">{column.type}</span>
+                                        </div>
+                                    ))}
+                                    {columnCount > columnPreview.length && (
+                                        <div className="flydb-column-chip flydb-column-chip--more">
+                                            +{columnCount - columnPreview.length} {__('more', 'flydb')}
                                         </div>
                                     )}
+                                </div>
+                            </CardBody>
+                        </Card>
+                    )}
+
+                    <Card className="flydb-card">
+                        <CardBody>
+                            <DataTable
+                                columns={columns}
+                                rows={rows}
+                                isLoading={isLoading}
+                                onSort={handleSort}
+                                sortColumn={sortColumn}
+                                sortOrder={sortOrder}
+                                highlightQuery={searchQuery}
+                                tableName={tableName}
+                            />
+                        </CardBody>
+                    </Card>
+
+                    <Card className="flydb-card flydb-pagination-card">
+                        <CardBody>
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={derivedTotalPages}
+                                perPage={perPage}
+                                totalRows={derivedTotalRows}
+                                onPageChange={handlePageChange}
+                                onPerPageChange={handlePerPageChange}
+                            />
+                        </CardBody>
+                    </Card>
+
+                    {showFilterPanel && (
+                        <div className="flydb-panel-overlay" onClick={() => setShowFilterPanel(false)}>
+                            <div 
+                                className="flydb-panel" 
+                                style={{ width: `${panelWidth}px` }}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div 
+                                    className="flydb-panel-resize-handle"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        isResizingRef.current = true;
+                                        document.body.style.cursor = 'ew-resize';
+                                        document.body.style.userSelect = 'none';
+                                    }}
+                                />
+                                <FilterBuilder
+                                    columns={columns}
+                                    filters={filters}
+                                    onFiltersChange={handleFiltersChange}
+                                    onClose={() => setShowFilterPanel(false)}
+                                    tableName={tableName}
                                 />
                             </div>
-
-                            <Button
-                                icon={filterIcon}
-                                onClick={() => {
-                                    setShowFilterPanel(!showFilterPanel);
-                                    setShowRelationshipPanel(false);
-                                }}
-                                variant="secondary"
-                            >
-                                {__('Filters', 'flydb')}
-                                {filters.length > 0 && (
-                                    <span className="flydb-filter-badge">{filters.length}</span>
-                                )}
-                            </Button>
-                            <Button
-                                icon={people}
-                                onClick={() => {
-                                    setShowRelationshipPanel(!showRelationshipPanel);
-                                    setShowFilterPanel(false);
-                                }}
-                                variant="secondary"
-                            >
-                                {__('Relationships', 'flydb')}
-                            </Button>
                         </div>
+                    )}
 
-                        <div className="flydb-toolbar-right">
-                            <KeyboardShortcutsButton onClick={() => setShowKeyboardHelp(true)} />
-                            <ExportButton
-                                table={tableName}
-                                search={searchQuery}
-                                filters={filters}
-                                totalRows={totalRows}
-                                columns={columns}
-                            />
+                    {showRelationshipPanel && (
+                        <div className="flydb-panel-overlay" onClick={() => setShowRelationshipPanel(false)}>
+                            <div 
+                                className="flydb-panel" 
+                                style={{ width: `${panelWidth}px` }}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div 
+                                    className="flydb-panel-resize-handle"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        isResizingRef.current = true;
+                                        document.body.style.cursor = 'ew-resize';
+                                        document.body.style.userSelect = 'none';
+                                    }}
+                                />
+                                <RelationshipPanel
+                                    tableName={tableName}
+                                    onClose={() => setShowRelationshipPanel(false)}
+                                />
+                            </div>
                         </div>
-                    </div>
-                </CardBody>
-            </Card>
+                    )}
 
-            {filters.length > 0 && (
-                <div className="flydb-active-filters">
-                    <strong>{__('Active filters:', 'flydb')}</strong>
-                    {filters.map((filter, index) => (
-                        <span key={index} className="flydb-filter-tag">
-                            {filter.column} {filter.operator} {filter.value}
-                        </span>
-                    ))}
+                    <KeyboardShortcutsModal 
+                        isOpen={showKeyboardHelp}
+                        onClose={() => setShowKeyboardHelp(false)}
+                    />
                 </div>
-            )}
+            </div>
+            <Button
+                className="flydb-floating-chat-button"
+                icon={commentContent}
+                variant="primary"
+                onClick={() => setShowChatPanel(true)}
+            >
+                {__('AI Chat', 'flydb')}
+            </Button>
 
-            {columnPreview.length > 0 && (
-                <Card className="flydb-columns-card">
-                    <CardBody>
-                        <div className="flydb-columns-card__header">
-                            <h3>{__('Column blueprint', 'flydb')}</h3>
-                            <span>{columnCount} {columnCount === 1 ? __('field', 'flydb') : __('fields', 'flydb')}</span>
-                        </div>
-                        <div className="flydb-columns-chip-group">
-                            {columnPreview.map((column) => (
-                                <div key={column.name} className="flydb-column-chip">
-                                    <span className="flydb-column-name">{column.name}</span>
-                                    <span className="flydb-column-type">{column.type}</span>
-                                </div>
-                            ))}
-                            {columnCount > columnPreview.length && (
-                                <div className="flydb-column-chip flydb-column-chip--more">
-                                    +{columnCount - columnPreview.length} {__('more', 'flydb')}
-                                </div>
-                            )}
-                        </div>
-                    </CardBody>
-                </Card>
-            )}
-
-            <Card className="flydb-card">
-                <CardBody>
-                    <DataTable
-                        columns={columns}
-                        rows={rows}
-                        isLoading={isLoading}
-                        onSort={handleSort}
-                        sortColumn={sortColumn}
-                        sortOrder={sortOrder}
-                        highlightQuery={searchQuery}
-                        tableName={tableName}
-                    />
-                </CardBody>
-            </Card>
-
-            <Card className="flydb-card flydb-pagination-card">
-                <CardBody>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={derivedTotalPages}
-                        perPage={perPage}
-                        totalRows={derivedTotalRows}
-                        onPageChange={handlePageChange}
-                        onPerPageChange={handlePerPageChange}
-                    />
-                </CardBody>
-            </Card>
-
-            {showFilterPanel && (
-                <div className="flydb-panel-overlay" onClick={() => setShowFilterPanel(false)}>
-                    <div 
-                        className="flydb-panel" 
+            {showChatPanel && (
+                <div className="flydb-panel-overlay" onClick={() => setShowChatPanel(false)}>
+                    <div
+                        className="flydb-panel flydb-chat-panel-floating"
                         style={{ width: `${panelWidth}px` }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div 
+                        <div
                             className="flydb-panel-resize-handle"
                             onMouseDown={(e) => {
                                 e.preventDefault();
@@ -523,45 +593,17 @@ const TableViewerPage = () => {
                                 document.body.style.userSelect = 'none';
                             }}
                         />
-                        <FilterBuilder
-                            columns={columns}
-                            filters={filters}
-                            onFiltersChange={handleFiltersChange}
-                            onClose={() => setShowFilterPanel(false)}
-                            tableName={tableName}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {showRelationshipPanel && (
-                <div className="flydb-panel-overlay" onClick={() => setShowRelationshipPanel(false)}>
-                    <div 
-                        className="flydb-panel" 
-                        style={{ width: `${panelWidth}px` }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div 
-                            className="flydb-panel-resize-handle"
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                isResizingRef.current = true;
-                                document.body.style.cursor = 'ew-resize';
-                                document.body.style.userSelect = 'none';
+                        <ChatPanel
+                            context={{
+                                tableName,
+                                columnCount,
+                                filters,
+                                searchQuery,
                             }}
                         />
-                        <RelationshipPanel
-                            tableName={tableName}
-                            onClose={() => setShowRelationshipPanel(false)}
-                        />
                     </div>
                 </div>
             )}
-
-            <KeyboardShortcutsModal 
-                isOpen={showKeyboardHelp}
-                onClose={() => setShowKeyboardHelp(false)}
-            />
         </div>
     );
 };

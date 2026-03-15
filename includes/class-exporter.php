@@ -25,31 +25,44 @@ class Exporter {
         $limit = isset($request['limit']) ? absint($request['limit']) : 1000;
         $offset = isset($request['offset']) ? absint($request['offset']) : 0;
         $selected_columns = isset($request['columns']) ? $request['columns'] : array();
+        $custom_rows = isset($request['customRows']) && is_array($request['customRows']) ? $request['customRows'] : array();
+        $custom_columns = isset($request['customColumns']) && is_array($request['customColumns']) ? $request['customColumns'] : array();
         
         if (empty($table)) {
             return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
         }
         
-        $limit = min($limit, $this->max_export_rows);
-        
-        $page = $offset > 0 ? floor($offset / $limit) + 1 : 1;
-        
-        $data_request = new \WP_REST_Request('GET', '/flydb/v1/table-data');
-        $data_request->set_param('table', $table);
-        $data_request->set_param('page', $page);
-        $data_request->set_param('per_page', $limit);
-        $data_request->set_param('search', $search);
-        $data_request->set_param('filters', $filters);
-        
-        $response = $this->table_viewer->get_table_data($data_request);
-        
-        if (is_wp_error($response)) {
-            return $response;
+        $rows = array();
+        $columns = array();
+
+        if (!empty($custom_rows)) {
+            $rows = $custom_rows;
+            if (!empty($custom_columns)) {
+                $columns = $custom_columns;
+            } else {
+                $columns = $this->build_columns_from_rows($custom_rows);
+            }
+        } else {
+            $limit = min($limit, $this->max_export_rows);
+            $page = $offset > 0 ? floor($offset / $limit) + 1 : 1;
+            
+            $data_request = new \WP_REST_Request('GET', '/flydb/v1/table-data');
+            $data_request->set_param('table', $table);
+            $data_request->set_param('page', $page);
+            $data_request->set_param('per_page', $limit);
+            $data_request->set_param('search', $search);
+            $data_request->set_param('filters', $filters);
+            
+            $response = $this->table_viewer->get_table_data($data_request);
+            
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            
+            $data = $response->get_data();
+            $rows = isset($data['rows']) ? $data['rows'] : array();
+            $columns = isset($data['columns']) ? $data['columns'] : array();
         }
-        
-        $data = $response->get_data();
-        $rows = isset($data['rows']) ? $data['rows'] : array();
-        $columns = isset($data['columns']) ? $data['columns'] : array();
         
         // Filter columns if specific columns are requested
         if (!empty($selected_columns) && is_array($selected_columns)) {
@@ -179,6 +192,24 @@ class Exporter {
             'content' => base64_encode($xlsx_content),
             'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ));
+    }
+
+    private function build_columns_from_rows($rows) {
+        if (empty($rows) || !is_array($rows)) {
+            return array();
+        }
+
+        $first_row = $rows[0];
+
+        if (!is_array($first_row)) {
+            return array();
+        }
+
+        $column_names = array_keys($first_row);
+
+        return array_map(function($name) {
+            return array('name' => $name);
+        }, $column_names);
     }
     
     private function generate_simple_xlsx($rows, $columns) {

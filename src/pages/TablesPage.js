@@ -4,6 +4,7 @@ import TableList from '../components/TableList';
 import Hero from '../components/Hero';
 import StatGrid from '../components/StatGrid';
 import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
+import ChatPanel from '../components/ChatPanel';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 
@@ -100,27 +101,35 @@ const TablesPage = () => {
 
     return (
         <div className="flydb-tables-page">
-            <Hero
-                label={__('Database overview', 'flydb')}
-                title={__('FlyDB Tables', 'flydb')}
-                meta={heroMeta}
-                description={__('Use the explorer to search, sort, and inspect every WordPress table with instant navigation into row-level data.', 'flydb')}
-            />
+            <div className="flydb-page-body">
+                <div className="flydb-main-column">
+                    <Hero
+                        label={__('Database overview', 'flydb')}
+                        title={__('FlyDB Tables', 'flydb')}
+                        meta={heroMeta}
+                        description={__('Use the explorer to search, sort, and inspect every WordPress table with instant navigation into row-level data.', 'flydb')}
+                    />
 
-            <StatGrid stats={statCards} />
+                    <StatGrid stats={statCards} />
 
-            {error && (
-                <div className="notice notice-error">
-                    <p>{error}</p>
+                    {error && (
+                        <div className="notice notice-error">
+                            <p>{error}</p>
+                        </div>
+                    )}
+
+                    <TableList tables={tables} isLoading={isLoading} />
+
+                    <KeyboardShortcutsModal 
+                        isOpen={showKeyboardHelp}
+                        onClose={() => setShowKeyboardHelp(false)}
+                    />
                 </div>
-            )}
 
-            <TableList tables={tables} isLoading={isLoading} />
-
-            <KeyboardShortcutsModal 
-                isOpen={showKeyboardHelp}
-                onClose={() => setShowKeyboardHelp(false)}
-            />
+                <aside className="flydb-chat-column">
+                    <ChatPanel context={{ workspace: 'tables_page' }} />
+                </aside>
+            </div>
         </div>
     );
 };

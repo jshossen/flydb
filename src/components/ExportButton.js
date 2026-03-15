@@ -6,7 +6,15 @@ import flydbApi from '../api/flydbApi';
 
 const CHUNK_SIZE = 1000;
 
-const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns = [] }) => {
+const ExportButton = ({
+    table,
+    search = '',
+    filters = [],
+    totalRows = 0,
+    columns = [],
+    customRows = null,
+    showScopeToggle = true,
+}) => {
     const [isExporting, setIsExporting] = useState(false);
     const [showProgress, setShowProgress] = useState(false);
     const [progress, setProgress] = useState({ current: 0, total: 0, percent: 0 });
@@ -18,7 +26,10 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
     const [presetName, setPresetName] = useState('');
     const [presetFormat, setPresetFormat] = useState('csv');
 
-    const getPresetStorageKey = (tableName) => `flydb_export_presets_${tableName}`;
+    const hasCustomRows = Array.isArray(customRows) && customRows.length > 0;
+    const effectiveTotalRows = hasCustomRows ? customRows.length : totalRows;
+
+    const getPresetStorageKey = (tableName) => `flydb_export_presets_${tableName || 'flydb'}`;
 
     useEffect(() => {
         if (columns.length > 0) {
@@ -93,13 +104,15 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
     const handleExport = async (format, overrideOptions = {}) => {
         const columnsToUse = overrideOptions.columns ?? selectedColumns;
         const useEntireDataset = overrideOptions.exportEntireDataset ?? exportEntireDataset;
-        const totalCount = overrideOptions.totalRows ?? totalRows;
+        const totalCount = overrideOptions.totalRows ?? effectiveTotalRows;
 
         setIsExporting(true);
 
-        const shouldChunk = totalCount > CHUNK_SIZE;
+        const shouldChunk = !hasCustomRows && totalCount > CHUNK_SIZE;
 
-        if (shouldChunk) {
+        if (hasCustomRows) {
+            await handleSimpleExport(format, columnsToUse, false, customRows);
+        } else if (shouldChunk) {
             setShowProgress(true);
             await handleChunkedExport(format, columnsToUse, useEntireDataset, totalCount);
         } else {
@@ -110,7 +123,7 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
         setShowProgress(false);
     };
 
-    const handleSimpleExport = async (format, columnsToUse, useEntireDataset) => {
+    const handleSimpleExport = async (format, columnsToUse, useEntireDataset, customRowsPayload = null) => {
         try {
             const response = await flydbApi.exportData({
                 table,
@@ -118,7 +131,9 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
                 search: useEntireDataset ? '' : search,
                 filters: useEntireDataset ? [] : filters,
                 columns: columnsToUse,
-                limit: 10000,
+                limit: customRowsPayload ? customRowsPayload.length : 10000,
+                customRows: customRowsPayload,
+                customColumns: customRowsPayload ? columns : undefined,
             });
 
             if (response.success) {
@@ -290,19 +305,21 @@ const ExportButton = ({ table, search = '', filters = [], totalRows = 0, columns
                                 )}
                             </div>
                         </MenuGroup>
-                        <MenuGroup>
-                            <div className="flydb-export-scope-toggle">
-                                <ToggleControl
-                                    label={__('Export entire dataset', 'flydb')}
-                                    help={exportEntireDataset 
-                                        ? __('All rows will be exported', 'flydb')
-                                        : __('Only filtered/searched rows will be exported', 'flydb')
-                                    }
-                                    checked={exportEntireDataset}
-                                    onChange={setExportEntireDataset}
-                                />
-                            </div>
-                        </MenuGroup>
+                        {showScopeToggle && !hasCustomRows && (
+                            <MenuGroup>
+                                <div className="flydb-export-scope-toggle">
+                                    <ToggleControl
+                                        label={__('Export entire dataset', 'flydb')}
+                                        help={exportEntireDataset 
+                                            ? __('All rows will be exported', 'flydb')
+                                            : __('Only filtered/searched rows will be exported', 'flydb')
+                                        }
+                                        checked={exportEntireDataset}
+                                        onChange={setExportEntireDataset}
+                                    />
+                                </div>
+                            </MenuGroup>
+                        )}
                         <MenuGroup>
                             <MenuItem
                                 icon={settings}
