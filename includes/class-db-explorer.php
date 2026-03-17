@@ -74,7 +74,7 @@ class DB_Explorer {
         $table_name = $this->sanitize_table_name($table_name);
         
         $columns = $this->wpdb->get_results(
-            "SHOW COLUMNS FROM `{$table_name}`",
+            "SHOW FULL COLUMNS FROM `{$table_name}`",
             ARRAY_A
         );
         
@@ -88,6 +88,7 @@ class DB_Explorer {
                 'key' => $column['Key'],
                 'default' => $column['Default'],
                 'extra' => $column['Extra'],
+                'comment' => isset($column['Comment']) ? $column['Comment'] : '',
             );
         }
         

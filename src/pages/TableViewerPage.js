@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem } from '@wordpress/components';
+import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem, CheckboxControl } from '@wordpress/components';
 import { arrowLeft, filter as filterIcon, postDate, people, commentContent } from '@wordpress/icons';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
@@ -21,6 +21,7 @@ const SEARCH_DEBOUNCE_MS = 500;
 const SEARCH_HISTORY_LIMIT = 6;
 
 const getHistoryStorageKey = (table) => `flydb_search_history_${table}`;
+const getVisibleColumnsKey = (table) => `flydb_visible_columns_${table}`;
 
 const TableViewerPage = () => {
     const { tableName } = useParams();
@@ -49,6 +50,7 @@ const TableViewerPage = () => {
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
     const [showChatPanel, setShowChatPanel] = useState(false);
+    const [visibleColumns, setVisibleColumns] = useState([]);
     const skipDebounceRef = useRef(false);
     const isResizingRef = useRef(false);
     const searchInputRef = useRef(null);
@@ -59,6 +61,35 @@ const TableViewerPage = () => {
             loadTableData();
         }
     }, [tableName, currentPage, perPage, searchQuery, sortColumn, sortOrder, filters]);
+
+    useEffect(() => {
+        if (!tableName || typeof window === 'undefined') {
+            setVisibleColumns([]);
+            return;
+        }
+
+        try {
+            const stored = window.localStorage.getItem(getVisibleColumnsKey(tableName));
+            if (stored) {
+                setVisibleColumns(JSON.parse(stored));
+            } else if (columns.length > 0) {
+                const allColumnNames = columns.map(col => col.name);
+                setVisibleColumns(allColumnNames);
+            }
+        } catch (error) {
+            console.error('Failed to load visible columns', error);
+            if (columns.length > 0) {
+                setVisibleColumns(columns.map(col => col.name));
+            }
+        }
+    }, [tableName]);
+
+    useEffect(() => {
+        if (columns.length > 0 && visibleColumns.length === 0) {
+            const allColumnNames = columns.map(col => col.name);
+            setVisibleColumns(allColumnNames);
+        }
+    }, [columns]);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -292,6 +323,27 @@ const TableViewerPage = () => {
 
     const columnPreview = useMemo(() => columns.slice(0, 4), [columns]);
 
+    const filteredColumns = useMemo(() => {
+        if (visibleColumns.length === 0) return columns;
+        return columns.filter(col => visibleColumns.includes(col.name));
+    }, [columns, visibleColumns]);
+
+    const handleColumnVisibilityToggle = useCallback((columnName) => {
+        setVisibleColumns(prev => {
+            const updated = prev.includes(columnName)
+                ? prev.filter(name => name !== columnName)
+                : [...prev, columnName];
+            
+            try {
+                window.localStorage.setItem(getVisibleColumnsKey(tableName), JSON.stringify(updated));
+            } catch (error) {
+                console.error('Failed to save visible columns', error);
+            }
+            
+            return updated;
+        });
+    }, [tableName]);
+
     const statCards = useMemo(
         () => [
             {
@@ -441,7 +493,7 @@ const TableViewerPage = () => {
                                         search={searchQuery}
                                         filters={filters}
                                         totalRows={totalRows}
-                                        columns={columns}
+                                        columns={filteredColumns}
                                     />
                                 </div>
                             </div>
@@ -467,17 +519,21 @@ const TableViewerPage = () => {
                                     <span>{columnCount} {columnCount === 1 ? __('field', 'flydb') : __('fields', 'flydb')}</span>
                                 </div>
                                 <div className="flydb-columns-chip-group">
-                                    {columnPreview.map((column) => (
+                                    {columns.map((column) => (
                                         <div key={column.name} className="flydb-column-chip">
-                                            <span className="flydb-column-name">{column.name}</span>
-                                            <span className="flydb-column-type">{column.type}</span>
+                                            <CheckboxControl
+                                                checked={visibleColumns.includes(column.name)}
+                                                onChange={() => handleColumnVisibilityToggle(column.name)}
+                                            />
+                                            <div className="flydb-column-info">
+                                                <span className="flydb-column-name">{column.name}</span>
+                                                <span className="flydb-column-type">{column.type}</span>
+                                                {column.comment && (
+                                                    <span className="flydb-column-comment">{column.comment}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
-                                    {columnCount > columnPreview.length && (
-                                        <div className="flydb-column-chip flydb-column-chip--more">
-                                            +{columnCount - columnPreview.length} {__('more', 'flydb')}
-                                        </div>
-                                    )}
                                 </div>
                             </CardBody>
                         </Card>
@@ -486,7 +542,7 @@ const TableViewerPage = () => {
                     <Card className="flydb-card">
                         <CardBody>
                             <DataTable
-                                columns={columns}
+                                columns={filteredColumns}
                                 rows={rows}
                                 isLoading={isLoading}
                                 onSort={handleSort}
