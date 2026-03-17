@@ -50,6 +50,7 @@ const TableViewerPage = () => {
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
     const [showChatPanel, setShowChatPanel] = useState(false);
+    const [showColumnPanel, setShowColumnPanel] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const skipDebounceRef = useRef(false);
     const isResizingRef = useRef(false);
@@ -283,10 +284,11 @@ const TableViewerPage = () => {
         { sequence: 'gt', action: () => navigate('/'), allowInInput: false },
         { key: '/', action: () => searchInputRef.current?.focus(), allowInInput: false },
         { key: 'Escape', action: () => {
-            if (showFilterPanel || showRelationshipPanel || showKeyboardHelp) {
+            if (showFilterPanel || showRelationshipPanel || showKeyboardHelp || showColumnPanel) {
                 setShowFilterPanel(false);
                 setShowRelationshipPanel(false);
                 setShowKeyboardHelp(false);
+                setShowColumnPanel(false);
             } else if (searchInput) {
                 setSearchInput('');
                 setSearchQuery('');
@@ -309,17 +311,18 @@ const TableViewerPage = () => {
         
         // Help
         { key: '?', shift: true, action: () => setShowKeyboardHelp(true), allowInInput: false },
-    ], [navigate, currentPage, derivedTotalPages, showFilterPanel, showRelationshipPanel, showKeyboardHelp, searchInput]);
+    ], [navigate, currentPage, derivedTotalPages, showFilterPanel, showRelationshipPanel, showKeyboardHelp, showColumnPanel, searchInput]);
 
     useKeyboardShortcuts(shortcuts, !isLoading);
 
     const heroMeta = useMemo(() => {
         return [
+            `${derivedTotalRows.toLocaleString()} ${__('total rows', 'flydb')}`,
+            `${rows.length} ${__('visible rows', 'flydb')}`,
             `${columnCount} ${columnCount === 1 ? __('column', 'flydb') : __('columns', 'flydb')}`,
-            `${derivedTotalRows.toLocaleString()} ${derivedTotalRows === 1 ? __('row', 'flydb') : __('rows', 'flydb')}`,
-            `${__('Page', 'flydb')} ${currentPage} ${__('of', 'flydb')} ${derivedTotalPages}`,
+            `${__('Page', 'flydb')} ${currentPage}/${derivedTotalPages}`,
         ];
-    }, [columnCount, derivedTotalRows, currentPage, derivedTotalPages]);
+    }, [columnCount, derivedTotalRows, currentPage, derivedTotalPages, rows.length]);
 
     const columnPreview = useMemo(() => columns.slice(0, 4), [columns]);
 
@@ -390,8 +393,6 @@ const TableViewerPage = () => {
                             {error}
                         </Notice>
                     )}
-
-                    <StatGrid stats={statCards} />
 
                     <Card className="flydb-card">
                         <CardBody className="flydb-toolbar-card">
@@ -470,19 +471,20 @@ const TableViewerPage = () => {
                                         variant="secondary"
                                     >
                                         {__('Filters', 'flydb')}
-                                        {filters.length > 0 && (
-                                            <span className="flydb-filter-badge">{filters.length}</span>
-                                        )}
                                     </Button>
                                     <Button
-                                        icon={people}
-                                        onClick={() => {
-                                            setShowRelationshipPanel(!showRelationshipPanel);
-                                            setShowFilterPanel(false);
-                                        }}
                                         variant="secondary"
+                                        icon={people}
+                                        onClick={() => setShowRelationshipPanel(!showRelationshipPanel)}
                                     >
                                         {__('Relationships', 'flydb')}
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
+                                        icon={commentContent}
+                                        onClick={() => setShowColumnPanel(!showColumnPanel)}
+                                    >
+                                        {__('Column blueprint', 'flydb')}
                                     </Button>
                                 </div>
 
@@ -511,33 +513,6 @@ const TableViewerPage = () => {
                         </div>
                     )}
 
-                    {columnPreview.length > 0 && (
-                        <Card className="flydb-columns-card">
-                            <CardBody>
-                                <div className="flydb-columns-card__header">
-                                    <h3>{__('Column blueprint', 'flydb')}</h3>
-                                    <span>{columnCount} {columnCount === 1 ? __('field', 'flydb') : __('fields', 'flydb')}</span>
-                                </div>
-                                <div className="flydb-columns-chip-group">
-                                    {columns.map((column) => (
-                                        <div key={column.name} className="flydb-column-chip">
-                                            <CheckboxControl
-                                                checked={visibleColumns.includes(column.name)}
-                                                onChange={() => handleColumnVisibilityToggle(column.name)}
-                                            />
-                                            <div className="flydb-column-info">
-                                                <span className="flydb-column-name">{column.name}</span>
-                                                <span className="flydb-column-type">{column.type}</span>
-                                                {column.comment && (
-                                                    <span className="flydb-column-comment">{column.comment}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardBody>
-                        </Card>
-                    )}
 
                     <Card className="flydb-card">
                         <CardBody>
@@ -590,6 +565,58 @@ const TableViewerPage = () => {
                                     onClose={() => setShowFilterPanel(false)}
                                     tableName={tableName}
                                 />
+                            </div>
+                        </div>
+                    )}
+
+                    {showColumnPanel && (
+                        <div className="flydb-panel-overlay" onClick={() => setShowColumnPanel(false)}>
+                            <div 
+                                className="flydb-panel" 
+                                style={{ width: `${panelWidth}px` }}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div 
+                                    className="flydb-panel-resize-handle"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        isResizingRef.current = true;
+                                        document.body.style.cursor = 'ew-resize';
+                                        document.body.style.userSelect = 'none';
+                                    }}
+                                />
+                                <div className="flydb-panel-content">
+                                    <div className="flydb-panel-header">
+                                        <h2>{__('Column blueprint', 'flydb')}</h2>
+                                        <Button
+                                            icon="no-alt"
+                                            label={__('Close', 'flydb')}
+                                            onClick={() => setShowColumnPanel(false)}
+                                        />
+                                    </div>
+                                    <div className="flydb-panel-body">
+                                        <p className="flydb-panel-description">
+                                            {columnCount} {columnCount === 1 ? __('field', 'flydb') : __('fields', 'flydb')} · {__('Toggle visibility for each column', 'flydb')}
+                                        </p>
+                                        <div className="flydb-columns-chip-group">
+                                            {columns.map((column) => (
+                                                <div key={column.name} className="flydb-column-chip">
+                                                    <CheckboxControl
+                                                        checked={visibleColumns.includes(column.name)}
+                                                        onChange={() => handleColumnVisibilityToggle(column.name)}
+                                                    />
+                                                    <div className="flydb-column-info">
+                                                        <span className="flydb-column-name">{column.name}</span>
+                                                        <span className="flydb-column-type">{column.type}</span>
+                                                        {column.comment && (
+                                                            <span className="flydb-column-comment" title={column.comment}>{column.comment}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
