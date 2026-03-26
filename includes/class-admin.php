@@ -31,6 +31,15 @@ class Admin {
             'fly-db',
             array($this, 'render_database_explorer')
         );
+
+        add_submenu_page(
+            'fly-db',
+            __('Query Builder', 'fly-db'),
+            __('Query Builder', 'fly-db'),
+            'manage_options',
+            'fly-db-query-builder',
+            array($this, 'render_query_builder')
+        );
     }
     
     public function enqueue_assets($hook) {
@@ -63,10 +72,17 @@ class Admin {
         
         wp_set_script_translations('flydb-admin', 'fly-db');
         
+        $default_route = '';
+
+        if (isset($_GET['page']) && $_GET['page'] === 'fly-db-query-builder') {
+            $default_route = 'query-builder';
+        }
+
         wp_localize_script('flydb-admin', 'flydbConfig', array(
             'restUrl' => rest_url('flydb/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
+            'defaultRoute' => $default_route,
         ));
     }
     
@@ -75,6 +91,14 @@ class Admin {
             wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'fly-db'));
         }
         
+        include FLYDB_PLUGIN_DIR . 'admin/app.php';
+    }
+
+    public function render_query_builder() {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'fly-db'));
+        }
+
         include FLYDB_PLUGIN_DIR . 'admin/app.php';
     }
 }

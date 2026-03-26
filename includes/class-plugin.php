@@ -15,6 +15,7 @@ class Plugin {
     private $exporter;
     private $relationship_detector;
     private $chat_controller;
+    private $query_builder_controller;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -35,6 +36,7 @@ class Plugin {
         require_once FLYDB_PLUGIN_DIR . 'includes/class-exporter.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-relationship-detector.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-chat-controller.php';
+        require_once FLYDB_PLUGIN_DIR . 'includes/class-query-builder-controller.php';
         
         $this->admin = new Admin();
         $this->db_explorer = new DB_Explorer();
@@ -42,6 +44,7 @@ class Plugin {
         $this->exporter = new Exporter();
         $this->relationship_detector = new Relationship_Detector();
         $this->chat_controller = new Chat_Controller( $this->table_viewer, $this->db_explorer, $this->relationship_detector );
+        $this->query_builder_controller = new Query_Builder_Controller();
     }
     
     private function init_hooks() {
@@ -95,6 +98,31 @@ class Plugin {
         \register_rest_route('flydb/v1', '/chat/query', array(
             'methods' => 'POST',
             'callback' => array($this->chat_controller, 'query'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/execute', array(
+            'methods' => 'POST',
+            'callback' => array($this->query_builder_controller, 'execute_query'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/presets', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this->query_builder_controller, 'get_presets'),
+                'permission_callback' => array($this, 'check_permissions'),
+            ),
+            array(
+                'methods' => 'POST',
+                'callback' => array($this->query_builder_controller, 'save_preset'),
+                'permission_callback' => array($this, 'check_permissions'),
+            ),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/presets/(?P<id>\d+)', array(
+            'methods' => 'DELETE',
+            'callback' => array($this->query_builder_controller, 'delete_preset'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
     }
