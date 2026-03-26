@@ -75,7 +75,7 @@ FlyDB is a lightweight, secure, and scalable WordPress plugin that provides admi
 
 == Installation ==
 
-1. Upload the `fly-db` folder to the `/wp-content/plugins/` directory
+1. Upload the `flydb` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to 'FlyDB' in the admin menu
 4. Start exploring your database!
@@ -154,7 +154,7 @@ FlyDB does not collect, store, or transmit any data outside of your WordPress in
 == Support ==
 
 For support, feature requests, or bug reports, please visit:
-* GitHub: https://github.com/yourusername/flydb
+* GitHub: https://github.com/jshossen/flydb
 * Support Forum: https://wordpress.org/support/plugin/flydb/
 
 == Credits ==

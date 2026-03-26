@@ -62,7 +62,7 @@ A powerful, lightweight, and secure database explorer plugin for WordPress that 
 1. **Download or Clone**
    ```bash
    cd wp-content/plugins/
-   git clone https://github.com/yourusername/flydb.git fly-db
+   git clone https://github.com/jshossen/flydb.git
    ```
 
 2. **Activate Plugin**
@@ -77,7 +77,7 @@ A powerful, lightweight, and secure database explorer plugin for WordPress that 
 
 ```
 flydb/
-├── fly-db.php                         # Main plugin file
+├── flydb.php                         # Main plugin file
 ├── readme.txt                         # WordPress.org readme
 ├── README.md                          # Developer documentation
 ├── LICENSE                            # GPL v2 license
@@ -316,9 +316,9 @@ Found a bug? Please open an issue on GitHub with:
 
 ## 💬 Support
 
-- **Documentation**: [GitHub Wiki](https://github.com/yourusername/flydb/wiki)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/flydb/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/flydb/discussions)
+- **Documentation**: [GitHub Wiki](https://github.com/jshossen/flydb/wiki)
+- **Issues**: [GitHub Issues](https://github.com/jshossen/flydb/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jshossen/flydb/discussions)
 
 ## 🙏 Credits
 

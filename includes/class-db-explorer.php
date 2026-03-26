@@ -55,7 +55,7 @@ class DB_Explorer {
         $table_name = $this->sanitize_table_name($table_name);
         
         if (!$this->table_exists($table_name)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
         }
         
         $columns = $this->get_table_columns($table_name);
@@ -72,9 +72,10 @@ class DB_Explorer {
     
     public function get_table_columns($table_name) {
         $table_name = $this->sanitize_table_name($table_name);
+        $table_name_escaped = \esc_sql($table_name);
         
         $columns = $this->wpdb->get_results(
-            "SHOW COLUMNS FROM `{$table_name}`",
+            "SHOW COLUMNS FROM `{$table_name_escaped}`",
             ARRAY_A
         );
         
@@ -96,9 +97,10 @@ class DB_Explorer {
     
     public function get_table_indexes($table_name) {
         $table_name = $this->sanitize_table_name($table_name);
+        $table_name_escaped = \esc_sql($table_name);
         
         $indexes = $this->wpdb->get_results(
-            "SHOW INDEX FROM `{$table_name}`",
+            "SHOW INDEX FROM `{$table_name_escaped}`",
             ARRAY_A
         );
         
@@ -107,9 +109,10 @@ class DB_Explorer {
     
     public function get_table_row_count($table_name) {
         $table_name = $this->sanitize_table_name($table_name);
+        $table_name_escaped = \esc_sql($table_name);
         
         $count = $this->wpdb->get_var(
-            "SELECT COUNT(*) FROM `{$table_name}`"
+            "SELECT COUNT(*) FROM `{$table_name_escaped}`"
         );
         
         return (int) $count;
@@ -117,16 +120,16 @@ class DB_Explorer {
     
     public function table_exists($table_name) {
         $table_name = $this->sanitize_table_name($table_name);
+        $db_name = DB_NAME;
         
-        $exists = $this->wpdb->get_var(
-            $this->wpdb->prepare(
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Values are properly passed to prepare() with placeholders.
+        return (bool) $this->wpdb->get_var(
+            $this->wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                 "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
-                DB_NAME,
-                $table_name
+                $db_name, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                $table_name // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
             )
         );
-        
-        return (bool) $exists;
     }
     
     public function sanitize_table_name($table_name) {

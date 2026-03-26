@@ -21,13 +21,13 @@ class Relationship_Detector {
         $row_id = isset($request['row_id']) ? absint($request['row_id']) : 0;
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
         }
         
         $table = $this->db_explorer->sanitize_table_name($table);
         
         if (!$this->db_explorer->table_exists($table)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
         }
         
         $relationships = $this->detect_table_relationships($table);
@@ -106,8 +106,12 @@ class Relationship_Detector {
             }
         }
         
+        $table_escaped = \esc_sql($table);
+        $primary_key_escaped = \esc_sql($primary_key);
+        $query = "SELECT * FROM `{$table_escaped}` WHERE `{$primary_key_escaped}` = %d";
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
         $row = $this->wpdb->get_row(
-            $this->wpdb->prepare("SELECT * FROM `{$table}` WHERE `{$primary_key}` = %d", $row_id),
+            $this->wpdb->prepare($query, $row_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
             ARRAY_A
         );
         
@@ -125,11 +129,12 @@ class Relationship_Detector {
                 if (isset($row[$local_column]) && !empty($row[$local_column])) {
                     $foreign_id = $row[$local_column];
                     
+                    $foreign_table_escaped = \esc_sql($foreign_table);
+                    $foreign_column_escaped = \esc_sql($foreign_column);
+                    $query = "SELECT * FROM `{$foreign_table_escaped}` WHERE `{$foreign_column_escaped}` = %s LIMIT 1";
+                    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
                     $related_row = $this->wpdb->get_row(
-                        $this->wpdb->prepare(
-                            "SELECT * FROM `{$foreign_table}` WHERE `{$foreign_column}` = %s LIMIT 1",
-                            $foreign_id
-                        ),
+                        $this->wpdb->prepare($query, $foreign_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                         ARRAY_A
                     );
                     
@@ -143,11 +148,12 @@ class Relationship_Detector {
                     }
                 }
             } elseif ($type === 'has_many') {
+                $foreign_table_escaped = \esc_sql($foreign_table);
+                $foreign_column_escaped = \esc_sql($foreign_column);
+                $query = "SELECT * FROM `{$foreign_table_escaped}` WHERE `{$foreign_column_escaped}` = %d LIMIT 10";
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
                 $related_rows = $this->wpdb->get_results(
-                    $this->wpdb->prepare(
-                        "SELECT * FROM `{$foreign_table}` WHERE `{$foreign_column}` = %d LIMIT 10",
-                        $row_id
-                    ),
+                    $this->wpdb->prepare($query, $row_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                     ARRAY_A
                 );
                 
