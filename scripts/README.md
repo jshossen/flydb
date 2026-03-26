@@ -10,10 +10,10 @@ The build script automates the process of creating a clean, production-ready Wor
 
 ### What it does:
 
-1. **Extracts Version** - Automatically reads the version number from `fly-db.php` header
+1. **Extracts Version** - Automatically reads the version number from `flydb.php` header
 2. **Builds React Assets** - Compiles React components using `@wordpress/scripts`
 3. **Creates Clean Package** - Copies plugin files while excluding development artifacts
-4. **Generates Zip File** - Creates a distributable zip file named `fly-db-{version}.zip`
+4. **Generates Zip File** - Creates a distributable zip file named `flydb-{version}.zip`
 
 ### Usage:
 
@@ -24,8 +24,8 @@ npm run package
 
 This will:
 - Build React assets to `/build` directory
-- Create `/dist/fly-db` folder with clean plugin files
-- Generate `/dist/fly-db-{version}.zip` ready for WordPress.org submission
+- Create `/dist/flydb` folder with clean plugin files
+- Generate `/dist/flydb-{version}.zip` ready for WordPress.org submission
 
 ### What gets excluded:
 
@@ -44,7 +44,7 @@ This will:
 - Development source files in `/src`
 
 **What stays in the package:**
-- `fly-db.php` (main plugin file)
+- `flydb.php` (main plugin file)
 - `readme.txt` (WordPress.org readme)
 - `/includes` (PHP classes)
 - `/admin` (admin templates)
@@ -53,7 +53,7 @@ This will:
 
 ### Version Detection
 
-The script automatically extracts the version from `fly-db.php` plugin header:
+The script automatically extracts the version from `flydb.php` plugin header:
 
 ```php
 /**
@@ -61,7 +61,7 @@ The script automatically extracts the version from `fly-db.php` plugin header:
  */
 ```
 
-The zip file will be named: `fly-db-1.0.0.zip`
+The zip file will be named: `flydb-1.0.0.zip`
 
 ### Build Output
 
@@ -69,14 +69,14 @@ After successful build:
 
 ```
 dist/
-├── fly-db/              # Clean plugin directory
-│   ├── fly-db.php
+├── flydb/              # Clean plugin directory
+│   ├── flydb.php
 │   ├── readme.txt
 │   ├── includes/
 │   ├── admin/
 │   ├── build/           # Compiled React assets
 │   └── languages/
-└── fly-db-1.0.0.zip     # Distribution package
+└── flydb-1.0.0.zip     # Distribution package
 ```
 
 ### Requirements
@@ -91,18 +91,18 @@ dist/
 - Run `npm run build` first to compile React components
 
 **Error: "Unable to detect Version"**
-- Ensure `fly-db.php` has proper version header format
+- Ensure `flydb.php` has proper version header format
 
 **Warning: "zip command not found"**
-- Install zip utility or manually compress the `dist/fly-db` folder
+- Install zip utility or manually compress the `dist/flydb` folder
 
 ## Development Workflow
 
 1. Make changes to source files
 2. Test locally
-3. Update version in `fly-db.php`
+3. Update version in `flydb.php`
 4. Run `npm run package`
-5. Upload `dist/fly-db-{version}.zip` to WordPress.org
+5. Upload `dist/flydb-{version}.zip` to WordPress.org
 
 ## Notes
 

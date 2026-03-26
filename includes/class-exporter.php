@@ -29,7 +29,7 @@ class Exporter {
         $custom_columns = isset($request['customColumns']) && is_array($request['customColumns']) ? $request['customColumns'] : array();
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
         }
         
         $rows = array();
@@ -77,7 +77,7 @@ class Exporter {
         }
         
         if (empty($rows)) {
-            return new \WP_Error('no_data', __('No data to export', 'fly-db'), array('status' => 400));
+            return new \WP_Error('no_data', __('No data to export', 'flydb'), array('status' => 400));
         }
         
         switch ($format) {
@@ -178,7 +178,7 @@ class Exporter {
     
     private function export_xlsx($rows, $columns, $table) {
         if (!class_exists('ZipArchive')) {
-            return new \WP_Error('missing_extension', __('ZipArchive extension is required for XLSX export', 'fly-db'), array('status' => 500));
+            return new \WP_Error('missing_extension', __('ZipArchive extension is required for XLSX export', 'flydb'), array('status' => 500));
         }
         
         $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.xlsx');

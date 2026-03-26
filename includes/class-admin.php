@@ -14,21 +14,21 @@ class Admin {
     
     public function add_admin_menu() {
         add_menu_page(
-            __('FlyDB - Database Explorer', 'fly-db'),
-            __('FlyDB', 'fly-db'),
+            __('FlyDB - Database Explorer', 'flydb'),
+            __('FlyDB', 'flydb'),
             'manage_options',
-            'fly-db',
+            'flydb',
             array($this, 'render_database_explorer'),
             'dashicons-database',
             80
         );
         
         add_submenu_page(
-            'fly-db',
-            __('Database Explorer', 'fly-db'),
-            __('Database Explorer', 'fly-db'),
+            'flydb',
+            __('Database Explorer', 'flydb'),
+            __('Database Explorer', 'flydb'),
             'manage_options',
-            'fly-db',
+            'flydb',
             array($this, 'render_database_explorer')
         );
 
@@ -43,7 +43,7 @@ class Admin {
     }
     
     public function enqueue_assets($hook) {
-        if (strpos($hook, 'fly-db') === false) {
+        if (strpos($hook, 'flydb') === false) {
             return;
         }
         
@@ -70,7 +70,7 @@ class Admin {
             true
         );
         
-        wp_set_script_translations('flydb-admin', 'fly-db');
+        wp_set_script_translations('flydb-admin', 'flydb');
         
         $default_route = '';
 
@@ -88,7 +88,7 @@ class Admin {
     
     public function render_database_explorer() {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'fly-db'));
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'flydb'));
         }
         
         include FLYDB_PLUGIN_DIR . 'admin/app.php';

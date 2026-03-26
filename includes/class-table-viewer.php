@@ -35,13 +35,13 @@ class Table_Viewer {
         }
         
         if (empty($table)) {
-            return new \WP_Error('missing_table', __('Table name is required', 'fly-db'), array('status' => 400));
+            return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
         }
         
         $table = $this->db_explorer->sanitize_table_name($table);
         
         if (!$this->db_explorer->table_exists($table)) {
-            return new \WP_Error('invalid_table', __('Table does not exist', 'fly-db'), array('status' => 404));
+            return new \WP_Error('invalid_table', __('Table does not exist', 'flydb'), array('status' => 404));
         }
         
         $per_page = min($per_page, $this->max_rows_per_page);
@@ -64,7 +64,8 @@ class Table_Viewer {
         if (!empty($search)) {
             $search_conditions = array();
             foreach ($column_names as $col) {
-                $search_conditions[] = "`{$col}` LIKE %s";
+                $col_escaped = \esc_sql($col);
+                $search_conditions[] = "`{$col_escaped}` LIKE %s";
                 $where_values[] = '%' . $this->wpdb->esc_like($search) . '%';
             }
             $where_clause = '(' . implode(' OR ', $search_conditions) . ')';
@@ -85,22 +86,36 @@ class Table_Viewer {
         
         $order_sql = '';
         if ($order_by) {
-            $order_sql = "ORDER BY `{$order_by}` {$order}";
+            $order_by_escaped = \esc_sql($order_by);
+            $order_sql = "ORDER BY `{$order_by_escaped}` {$order}";
         }
         
-        $count_query = "SELECT COUNT(*) FROM `{$table}` {$where_sql}";
+        $table_escaped = \esc_sql($table);
         
         if (!empty($where_values)) {
-            $count_query = $this->wpdb->prepare($count_query, $where_values);
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is escaped with esc_sql(), column names in WHERE clause are also escaped.
+            $total_rows = (int) $this->wpdb->get_var(
+                $this->wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                    "SELECT COUNT(*) FROM `{$table_escaped}` {$where_sql}",
+                    $where_values // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                )
+            );
+        } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is escaped with esc_sql().
+            $total_rows = (int) $this->wpdb->get_var(
+                "SELECT COUNT(*) FROM `{$table_escaped}` {$where_sql}"
+            );
         }
         
-        $total_rows = (int) $this->wpdb->get_var($count_query);
-        
-        $data_query = "SELECT * FROM `{$table}` {$where_sql} {$order_sql} LIMIT %d OFFSET %d";
         $query_values = array_merge($where_values, array($per_page, $offset));
-        $data_query = $this->wpdb->prepare($data_query, $query_values);
-        
-        $rows = $this->wpdb->get_results($data_query, ARRAY_A);
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name and column names are escaped with esc_sql().
+        $rows = $this->wpdb->get_results(
+            $this->wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                "SELECT * FROM `{$table_escaped}` {$where_sql} {$order_sql} LIMIT %d OFFSET %d",
+                $query_values // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+            ),
+            ARRAY_A
+        );
         
         if ($this->wpdb->last_error) {
             return new \WP_Error('db_error', $this->wpdb->last_error, array('status' => 500));
@@ -138,46 +153,48 @@ class Table_Viewer {
                 continue;
             }
             
+            $column_escaped = \esc_sql($column);
+            
             switch ($operator) {
                 case '=':
-                    $conditions[] = "`{$column}` = %s";
+                    $conditions[] = "`{$column_escaped}` = %s";
                     $where_values[] = $value;
                     break;
                     
                 case '!=':
-                    $conditions[] = "`{$column}` != %s";
+                    $conditions[] = "`{$column_escaped}` != %s";
                     $where_values[] = $value;
                     break;
                     
                 case 'LIKE':
-                    $conditions[] = "`{$column}` LIKE %s";
+                    $conditions[] = "`{$column_escaped}` LIKE %s";
                     $where_values[] = '%' . $this->wpdb->esc_like($value) . '%';
                     break;
                     
                 case '>':
-                    $conditions[] = "`{$column}` > %s";
+                    $conditions[] = "`{$column_escaped}` > %s";
                     $where_values[] = $value;
                     break;
                     
                 case '<':
-                    $conditions[] = "`{$column}` < %s";
+                    $conditions[] = "`{$column_escaped}` < %s";
                     $where_values[] = $value;
                     break;
                     
                 case '>=':
-                    $conditions[] = "`{$column}` >= %s";
+                    $conditions[] = "`{$column_escaped}` >= %s";
                     $where_values[] = $value;
                     break;
                     
                 case '<=':
-                    $conditions[] = "`{$column}` <= %s";
+                    $conditions[] = "`{$column_escaped}` <= %s";
                     $where_values[] = $value;
                     break;
                     
                 case 'BETWEEN':
                     $range_values = is_array($value) ? $value : explode(',', $value);
                     if (count($range_values) === 2) {
-                        $conditions[] = "`{$column}` BETWEEN %s AND %s";
+                        $conditions[] = "`{$column_escaped}` BETWEEN %s AND %s";
                         $where_values[] = trim($range_values[0]);
                         $where_values[] = trim($range_values[1]);
                     }
@@ -186,7 +203,7 @@ class Table_Viewer {
                 case 'IN':
                     if (is_array($value) && !empty($value)) {
                         $placeholders = implode(',', array_fill(0, count($value), '%s'));
-                        $conditions[] = "`{$column}` IN ({$placeholders})";
+                        $conditions[] = "`{$column_escaped}` IN ({$placeholders})";
                         foreach ($value as $v) {
                             $where_values[] = $v;
                         }

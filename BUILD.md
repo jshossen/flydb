@@ -12,7 +12,7 @@ This document explains how to build the React-based admin interface for FlyDB.
 
 1. **Navigate to the plugin directory:**
    ```bash
-   cd wp-content/plugins/fly-db
+   cd wp-content/plugins/flydb
    ```
 
 2. **Install dependencies:**
@@ -60,7 +60,7 @@ This will:
 ## File Structure
 
 ```
-fly-db/
+flydb/
 ├── src/                    # Source files (edit these)
 │   ├── index.js           # Entry point
 │   ├── App.js             # Main app component
@@ -174,7 +174,7 @@ npm run format
    ```
 
 3. **Deploy plugin:**
-   - Upload entire `fly-db/` folder to server
+   - Upload entire `flydb/` folder to server
    - Or use Git deployment
    - Activate plugin in WordPress admin
 

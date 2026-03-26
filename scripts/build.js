@@ -8,7 +8,7 @@ const { execSync } = require('child_process');
 const rootDir = path.resolve(__dirname, '..');
 const distDir = path.join(rootDir, 'dist');
 const reactBuildDir = path.join(rootDir, 'build');
-const pluginSlug = 'fly-db';
+const pluginSlug = 'flydb';
 const packageDir = path.join(distDir, pluginSlug);
 
 const ROOT_DIR_EXCLUDES = new Set([
@@ -37,6 +37,7 @@ const FILE_EXCLUDES = new Set([
   '.babelrc',
   'admin-old.scss',
   'plan.md',
+  'BUILD.md'
 ]);
 
 const DEV_FILE_REMOVALS = [
@@ -67,12 +68,12 @@ const ensureFreshBuildDir = async () => {
 };
 
 const getPluginVersion = async () => {
-  const pluginFile = path.join(rootDir, 'fly-db.php');
+  const pluginFile = path.join(rootDir, 'flydb.php');
   const contents = await fs.promises.readFile(pluginFile, 'utf8');
   const match = contents.match(/\*\s*Version:\s*([0-9.]+)/i);
 
   if (!match) {
-    throw new Error('Unable to detect Version in fly-db.php');
+    throw new Error('Unable to detect Version in flydb.php');
   }
 
   return match[1];
@@ -204,7 +205,7 @@ const createZipArchive = async (zipFileName) => {
     
     await ensureFreshBuildDir();
 
-    log('Copying plugin files into dist/fly-db');
+    log('Copying plugin files into dist/flydb');
     await copyDirectory(rootDir, packageDir);
     
     log('Copying React build assets');
