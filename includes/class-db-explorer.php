@@ -7,18 +7,18 @@ if (!defined('ABSPATH')) {
 
 class DB_Explorer {
     
-    private $wpdb;
-    
     public function __construct() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
+        // Constructor kept for backward compatibility
     }
     
     public function get_tables($request = null) {
-        $tables = $this->wpdb->get_results("SHOW TABLE STATUS", ARRAY_A);
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
         
-        if ($this->wpdb->last_error) {
-            return new \WP_Error('db_error', $this->wpdb->last_error, array('status' => 500));
+        $tables = $wpdb->get_results("SHOW TABLE STATUS", ARRAY_A);
+        
+        if ($wpdb->last_error) {
+            return new \WP_Error('db_error', $wpdb->last_error, array('status' => 500));
         }
         
         $formatted_tables = array();
@@ -71,11 +71,13 @@ class DB_Explorer {
     }
     
     public function get_table_columns($table_name) {
-        $table_name = $this->sanitize_table_name($table_name);
-        $table_name_escaped = \esc_sql($table_name);
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
         
-        $columns = $this->wpdb->get_results(
-            "SHOW FULL COLUMNS FROM `{$table_name_escaped}`",
+        $table_name = $this->sanitize_table_name($table_name);
+        
+        $columns = $wpdb->get_results(
+            "SHOW FULL COLUMNS FROM `{$wpdb->_escape($table_name)}`",
             ARRAY_A
         );
         
@@ -97,11 +99,13 @@ class DB_Explorer {
     }
     
     public function get_table_indexes($table_name) {
-        $table_name = $this->sanitize_table_name($table_name);
-        $table_name_escaped = \esc_sql($table_name);
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
         
-        $indexes = $this->wpdb->get_results(
-            "SHOW INDEX FROM `{$table_name_escaped}`",
+        $table_name = $this->sanitize_table_name($table_name);
+        
+        $indexes = $wpdb->get_results(
+            "SHOW INDEX FROM `{$wpdb->_escape($table_name)}`",
             ARRAY_A
         );
         
@@ -109,23 +113,28 @@ class DB_Explorer {
     }
     
     public function get_table_row_count($table_name) {
-        $table_name = $this->sanitize_table_name($table_name);
-        $table_name_escaped = \esc_sql($table_name);
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
         
-        $count = $this->wpdb->get_var(
-            "SELECT COUNT(*) FROM `{$table_name_escaped}`"
+        $table_name = $this->sanitize_table_name($table_name);
+        
+        $count = $wpdb->get_var(
+            "SELECT COUNT(*) FROM `{$wpdb->_escape($table_name)}`"
         );
         
         return (int) $count;
     }
     
     public function table_exists($table_name) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
         $table_name = $this->sanitize_table_name($table_name);
         $db_name = DB_NAME;
         
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Values are properly passed to prepare() with placeholders.
-        return (bool) $this->wpdb->get_var(
-            $this->wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        return (bool) $wpdb->get_var(
+            $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                 "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
                 $db_name, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
                 $table_name // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

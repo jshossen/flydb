@@ -21,15 +21,11 @@ class Chat_Controller {
     /** @var Relationship_Detector */
     private $relationship_detector;
 
-    /** @var \wpdb */
-    private $wpdb;
-
     public function __construct( Table_Viewer $table_viewer, DB_Explorer $db_explorer, Relationship_Detector $relationship_detector ) {
-        global $wpdb;
+        // Constructor - initialize dependencies for AI chat functionality
         $this->table_viewer = $table_viewer;
         $this->db_explorer = $db_explorer;
         $this->relationship_detector = $relationship_detector;
-        $this->wpdb = $wpdb;
     }
 
     public function get_config( $request ) {
@@ -117,10 +113,13 @@ class Chat_Controller {
     }
 
     private function build_schema_context( $focus_table = '' ) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
         $tables = array();
 
-        if ( $this->wpdb ) {
-            $tables = $this->wpdb->get_col( 'SHOW TABLES' );
+        if ( $wpdb ) {
+            $tables = $wpdb->get_col( 'SHOW TABLES' );
         }
 
         $schema_snapshot = array();
@@ -167,6 +166,9 @@ class Chat_Controller {
     }
 
     private function generate_sql_plan( $api_key, $model, $prompt, $schema_context, $ui_context ) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
         $system_prompt = \__( 'You are an AI SQL planner for the FlyDB WordPress plugin. Always respond with VALID JSON matching this shape: {"sql": "...", "table": "table_name", "summary": "1-2 sentence summary", "analysis": "why this query answers the question"}. Only produce read-only SELECT statements. Never mutate data. Prefer existing table/column names from the provided schema. Limit results to small previews if the user asks for broad data.', 'flydb' );
 
         $context_payload = array(
@@ -176,7 +178,7 @@ class Chat_Controller {
             'constraints' => array(
                 'read_only' => true,
                 'max_rows' => self::DEFAULT_ROW_LIMIT,
-                'database' => $this->wpdb ? $this->wpdb->dbname : '',
+                'database' => $wpdb ? $wpdb->dbname : '',
             ),
         );
 
@@ -287,14 +289,17 @@ class Chat_Controller {
     }
 
     private function run_preview_query( $sql, $table_hint = '' ) {
-        if ( ! $this->wpdb ) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
+        if ( ! $wpdb ) {
             return new \WP_Error( 'db_unavailable', \__( 'The database connection is not available.', 'flydb' ), array( 'status' => 500 ) );
         }
 
-        $rows = $this->wpdb->get_results( $sql, \ARRAY_A );
+        $rows = $wpdb->get_results( $sql, \ARRAY_A );
 
-        if ( $this->wpdb->last_error ) {
-            return new \WP_Error( 'db_error', $this->wpdb->last_error, array( 'status' => 500 ) );
+        if ( $wpdb->last_error ) {
+            return new \WP_Error( 'db_error', $wpdb->last_error, array( 'status' => 500 ) );
         }
 
         $columns = array();

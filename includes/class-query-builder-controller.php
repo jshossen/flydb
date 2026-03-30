@@ -7,11 +7,8 @@ if (!defined('ABSPATH')) {
 
 class Query_Builder_Controller {
     
-    private $wpdb;
-    
     public function __construct() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
+        // Constructor kept for backward compatibility
     }
     
     public function register_routes() {
@@ -50,6 +47,9 @@ class Query_Builder_Controller {
     }
     
     public function execute_query($request) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
         $sql = $request->get_param('sql');
         $limit = absint($request->get_param('limit')) ?: 50;
         
@@ -77,12 +77,12 @@ class Query_Builder_Controller {
         
         // Execute query
         try {
-            $results = $this->wpdb->get_results($sql, ARRAY_A);
+            $results = $wpdb->get_results($sql, ARRAY_A);
             
-            if ($this->wpdb->last_error) {
+            if ($wpdb->last_error) {
                 return new \WP_Error(
                     'query_error',
-                    $this->wpdb->last_error,
+                    $wpdb->last_error,
                     array('status' => 500)
                 );
             }
