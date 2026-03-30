@@ -7,13 +7,11 @@ if (!defined('ABSPATH')) {
 
 class Exporter {
     
-    private $wpdb;
     private $table_viewer;
     private $max_export_rows = 10000;
     
     public function __construct() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
+        // Constructor - initialize table viewer for data export operations
         $this->table_viewer = new Table_Viewer();
     }
     

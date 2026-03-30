@@ -7,12 +7,10 @@ if (!defined('ABSPATH')) {
 
 class Relationship_Detector {
     
-    private $wpdb;
     private $db_explorer;
     
     public function __construct() {
-        global $wpdb;
-        $this->wpdb = $wpdb;
+        // Constructor - initialize DB explorer for relationship detection
         $this->db_explorer = new DB_Explorer();
     }
     
@@ -95,10 +93,15 @@ class Relationship_Detector {
     }
     
     private function get_related_data($table, $row_id, $relationships) {
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
         $related_data = array();
         
         $primary_key = 'ID';
         $columns = $this->db_explorer->get_table_columns($table);
+        $column_names = array_column($columns, 'name');
+        
         foreach ($columns as $column) {
             if ($column['key'] === 'PRI') {
                 $primary_key = $column['name'];
@@ -106,12 +109,20 @@ class Relationship_Detector {
             }
         }
         
-        $table_escaped = \esc_sql($table);
-        $primary_key_escaped = \esc_sql($primary_key);
-        $query = "SELECT * FROM `{$table_escaped}` WHERE `{$primary_key_escaped}` = %d";
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
-        $row = $this->wpdb->get_row(
-            $this->wpdb->prepare($query, $row_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        if (!in_array($primary_key, $column_names, true)) {
+            return $related_data;
+        }
+        
+        $table_sanitized = $this->db_explorer->sanitize_table_name($table);
+        if (!$this->db_explorer->table_exists($table_sanitized)) {
+            return $related_data;
+        }
+        
+        $row = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM `{$wpdb->_escape($table_sanitized)}` WHERE `{$wpdb->_escape($primary_key)}` = %d",
+                $row_id
+            ),
             ARRAY_A
         );
         
@@ -125,16 +136,27 @@ class Relationship_Detector {
             $foreign_table = $relationship['foreign_table'];
             $foreign_column = $relationship['foreign_column'];
             
+            $foreign_table_sanitized = $this->db_explorer->sanitize_table_name($foreign_table);
+            if (!$this->db_explorer->table_exists($foreign_table_sanitized)) {
+                continue;
+            }
+            
+            $foreign_columns = $this->db_explorer->get_table_columns($foreign_table_sanitized);
+            $foreign_column_names = array_column($foreign_columns, 'name');
+            
+            if (!in_array($foreign_column, $foreign_column_names, true)) {
+                continue;
+            }
+            
             if ($type === 'belongs_to') {
                 if (isset($row[$local_column]) && !empty($row[$local_column])) {
                     $foreign_id = $row[$local_column];
                     
-                    $foreign_table_escaped = \esc_sql($foreign_table);
-                    $foreign_column_escaped = \esc_sql($foreign_column);
-                    $query = "SELECT * FROM `{$foreign_table_escaped}` WHERE `{$foreign_column_escaped}` = %s LIMIT 1";
-                    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
-                    $related_row = $this->wpdb->get_row(
-                        $this->wpdb->prepare($query, $foreign_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                    $related_row = $wpdb->get_row(
+                        $wpdb->prepare(
+                            "SELECT * FROM `{$wpdb->_escape($foreign_table_sanitized)}` WHERE `{$wpdb->_escape($foreign_column)}` = %s LIMIT 1",
+                            $foreign_id
+                        ),
                         ARRAY_A
                     );
                     
@@ -148,12 +170,11 @@ class Relationship_Detector {
                     }
                 }
             } elseif ($type === 'has_many') {
-                $foreign_table_escaped = \esc_sql($foreign_table);
-                $foreign_column_escaped = \esc_sql($foreign_column);
-                $query = "SELECT * FROM `{$foreign_table_escaped}` WHERE `{$foreign_column_escaped}` = %d LIMIT 10";
-                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are escaped with esc_sql().
-                $related_rows = $this->wpdb->get_results(
-                    $this->wpdb->prepare($query, $row_id), // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+                $related_rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT * FROM `{$wpdb->_escape($foreign_table_sanitized)}` WHERE `{$wpdb->_escape($foreign_column)}` = %d LIMIT 10",
+                        $row_id
+                    ),
                     ARRAY_A
                 );
                 
@@ -173,7 +194,10 @@ class Relationship_Detector {
     }
     
     private function get_all_table_names() {
-        $tables = $this->wpdb->get_results("SHOW TABLES", ARRAY_N);
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
+        $tables = $wpdb->get_results("SHOW TABLES", ARRAY_N);
         $table_names = array();
         
         foreach ($tables as $table) {
@@ -184,7 +208,10 @@ class Relationship_Detector {
     }
     
     private function guess_related_table($column_name, $all_tables) {
-        $prefix = $this->wpdb->prefix;
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
+        $prefix = $wpdb->prefix;
         
         $base_name = preg_replace('/_id$/i', '', $column_name);
         
@@ -220,7 +247,10 @@ class Relationship_Detector {
     }
     
     private function get_foreign_key_name($table) {
-        $prefix = $this->wpdb->prefix;
+        // Access global $wpdb object following WordPress best practices
+        global $wpdb;
+        
+        $prefix = $wpdb->prefix;
         
         $base_name = str_replace($prefix, '', $table);
         
