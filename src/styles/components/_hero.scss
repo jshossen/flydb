@@ -1,12 +1,12 @@
 .flydb-hero {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 8px;
-    padding: 24px 28px;
-    margin-bottom: 20px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: grid;
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
 
     .flydb-hero-content {
         position: relative;
@@ -20,10 +20,13 @@
         }
 
         .flydb-back-button {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+            padding: 6px 12px;
+            height: auto;
 
             &:hover {
                 background: rgba(255, 255, 255, 0.3);
@@ -33,15 +36,15 @@
         .flydb-hero-label {
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.75);
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
         }
 
         h1 {
-            margin: 0 0 12px 0;
-            font-size: 26px;
+            margin: 0 0 10px 0;
+            font-size: 22px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1.2;
@@ -50,15 +53,15 @@
         .flydb-hero-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
 
             .flydb-chip {
                 background: rgba(255, 255, 255, 0.2);
                 backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.3);
-                border-radius: 16px;
-                padding: 4px 12px;
-                font-size: 12px;
+                border-radius: 12px;
+                padding: 3px 10px;
+                font-size: 11px;
                 font-weight: 600;
                 color: #ffffff;
             }
@@ -66,14 +69,6 @@
     }
 
     .flydb-hero-description {
-        margin-top: 12px;
-
-        p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 13px;
-            line-height: 1.5;
-            max-width: 700px;
-        }
+        display: none;
     }
 }

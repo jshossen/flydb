@@ -21,29 +21,58 @@ class Exporter {
         $filters = isset($request['filters']) ? $request['filters'] : array();
         $search = isset($request['search']) ? sanitize_text_field($request['search']) : '';
         $limit = isset($request['limit']) ? absint($request['limit']) : 1000;
+        $offset = isset($request['offset']) ? absint($request['offset']) : 0;
+        $selected_columns = isset($request['columns']) ? $request['columns'] : array();
+        $custom_rows = isset($request['customRows']) && is_array($request['customRows']) ? $request['customRows'] : array();
+        $custom_columns = isset($request['customColumns']) && is_array($request['customColumns']) ? $request['customColumns'] : array();
         
         if (empty($table)) {
             return new \WP_Error('missing_table', __('Table name is required', 'flydb'), array('status' => 400));
         }
         
-        $limit = min($limit, $this->max_export_rows);
-        
-        $data_request = new \WP_REST_Request('GET', '/flydb/v1/table-data');
-        $data_request->set_param('table', $table);
-        $data_request->set_param('page', 1);
-        $data_request->set_param('per_page', $limit);
-        $data_request->set_param('search', $search);
-        $data_request->set_param('filters', $filters);
-        
-        $response = $this->table_viewer->get_table_data($data_request);
-        
-        if (is_wp_error($response)) {
-            return $response;
+        $rows = array();
+        $columns = array();
+
+        if (!empty($custom_rows)) {
+            $rows = $custom_rows;
+            if (!empty($custom_columns)) {
+                $columns = $custom_columns;
+            } else {
+                $columns = $this->build_columns_from_rows($custom_rows);
+            }
+        } else {
+            $limit = min($limit, $this->max_export_rows);
+            $page = $offset > 0 ? floor($offset / $limit) + 1 : 1;
+            
+            $data_request = new \WP_REST_Request('GET', '/flydb/v1/table-data');
+            $data_request->set_param('table', $table);
+            $data_request->set_param('page', $page);
+            $data_request->set_param('per_page', $limit);
+            $data_request->set_param('search', $search);
+            $data_request->set_param('filters', $filters);
+            
+            $response = $this->table_viewer->get_table_data($data_request);
+            
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            
+            $data = $response->get_data();
+            $rows = isset($data['rows']) ? $data['rows'] : array();
+            $columns = isset($data['columns']) ? $data['columns'] : array();
         }
         
-        $data = $response->get_data();
-        $rows = isset($data['rows']) ? $data['rows'] : array();
-        $columns = isset($data['columns']) ? $data['columns'] : array();
+        // Filter columns if specific columns are requested
+        if (!empty($selected_columns) && is_array($selected_columns)) {
+            $columns = array_filter($columns, function($col) use ($selected_columns) {
+                return in_array($col['name'], $selected_columns);
+            });
+            
+            // Filter row data to only include selected columns
+            $rows = array_map(function($row) use ($selected_columns) {
+                return array_intersect_key($row, array_flip($selected_columns));
+            }, $rows);
+        }
         
         if (empty($rows)) {
             return new \WP_Error('no_data', __('No data to export', 'flydb'), array('status' => 400));
@@ -55,6 +84,9 @@ class Exporter {
                 
             case 'xlsx':
                 return $this->export_xlsx($rows, $columns, $table);
+
+            case 'xml':
+                return $this->export_xml($rows, $table);
                 
             case 'csv':
             default:
@@ -84,6 +116,47 @@ class Exporter {
             'filename' => $filename,
             'content' => base64_encode($csv_content),
             'mime_type' => 'text/csv',
+        ));
+    }
+
+    private function export_xml($rows, $table) {
+        if (!class_exists('\DOMDocument')) {
+            return new \WP_Error('missing_extension', __('DOMDocument extension is required for XML export', 'flydb'), array('status' => 500));
+        }
+
+        $filename = sanitize_file_name($table . '_' . gmdate('Y-m-d_H-i-s') . '.xml');
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+
+        $root = $dom->createElement('dataset');
+        $root->setAttribute('table', $table);
+        $dom->appendChild($root);
+
+        foreach ($rows as $row_index => $row) {
+            $row_node = $dom->createElement('row');
+            $row_node->setAttribute('index', (string) ($row_index + 1));
+
+            foreach ($row as $column => $value) {
+                $column_node = $dom->createElement('column');
+                $column_node->setAttribute('name', $column);
+
+                $column_value = $dom->createCDATASection((string) $value);
+                $column_node->appendChild($column_value);
+                $row_node->appendChild($column_node);
+            }
+
+            $root->appendChild($row_node);
+        }
+
+        $xml_content = $dom->saveXML();
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'format' => 'xml',
+            'filename' => $filename,
+            'content' => base64_encode($xml_content),
+            'mime_type' => 'application/xml',
         ));
     }
     
@@ -117,6 +190,24 @@ class Exporter {
             'content' => base64_encode($xlsx_content),
             'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ));
+    }
+
+    private function build_columns_from_rows($rows) {
+        if (empty($rows) || !is_array($rows)) {
+            return array();
+        }
+
+        $first_row = $rows[0];
+
+        if (!is_array($first_row)) {
+            return array();
+        }
+
+        $column_names = array_keys($first_row);
+
+        return array_map(function($name) {
+            return array('name' => $name);
+        }, $column_names);
     }
     
     private function generate_simple_xlsx($rows, $columns) {

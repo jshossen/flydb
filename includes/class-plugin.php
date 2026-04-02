@@ -14,6 +14,7 @@ class Plugin {
     private $table_viewer;
     private $exporter;
     private $relationship_detector;
+    private $query_builder_controller;
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -33,46 +34,85 @@ class Plugin {
         require_once FLYDB_PLUGIN_DIR . 'includes/class-table-viewer.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-exporter.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-relationship-detector.php';
+        require_once FLYDB_PLUGIN_DIR . 'includes/class-query-builder-controller.php';
         
         $this->admin = new Admin();
         $this->db_explorer = new DB_Explorer();
         $this->table_viewer = new Table_Viewer();
         $this->exporter = new Exporter();
         $this->relationship_detector = new Relationship_Detector();
+        $this->query_builder_controller = new Query_Builder_Controller();
     }
     
     private function init_hooks() {
-        add_action('rest_api_init', array($this, 'register_rest_routes'));
+        \add_action('rest_api_init', array($this, 'register_rest_routes'));
     }
     
     public function register_rest_routes() {
-        register_rest_route('flydb/v1', '/tables', array(
+        \register_rest_route('flydb/v1', '/tables', array(
             'methods' => 'GET',
             'callback' => array($this->db_explorer, 'get_tables'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
         
-        register_rest_route('flydb/v1', '/table-data', array(
+        \register_rest_route('flydb/v1', '/table-data', array(
             'methods' => 'GET',
             'callback' => array($this->table_viewer, 'get_table_data'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
         
-        register_rest_route('flydb/v1', '/export', array(
+        \register_rest_route('flydb/v1', '/export', array(
             'methods' => 'POST',
             'callback' => array($this->exporter, 'export_data'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
         
-        register_rest_route('flydb/v1', '/relationships', array(
+        \register_rest_route('flydb/v1', '/relationships', array(
             'methods' => 'GET',
             'callback' => array($this->relationship_detector, 'get_relationships'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/relationships/all', array(
+            'methods' => 'GET',
+            'callback' => array($this->relationship_detector, 'get_all_relationships'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/execute', array(
+            'methods' => 'POST',
+            'callback' => array($this->query_builder_controller, 'execute_query'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/export', array(
+            'methods' => 'GET',
+            'callback' => array($this->query_builder_controller, 'export_query'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/presets', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this->query_builder_controller, 'get_presets'),
+                'permission_callback' => array($this, 'check_permissions'),
+            ),
+            array(
+                'methods' => 'POST',
+                'callback' => array($this->query_builder_controller, 'save_preset'),
+                'permission_callback' => array($this, 'check_permissions'),
+            ),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/presets/(?P<id>\d+)', array(
+            'methods' => 'DELETE',
+            'callback' => array($this->query_builder_controller, 'delete_preset'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
     }
     
     public function check_permissions() {
-        return current_user_can('manage_options');
+        return \current_user_can('manage_options');
     }
     
     public function get_admin() {

@@ -58,7 +58,7 @@ export const flydbApi = {
     /**
      * Export table data
      */
-    exportData: async ({ table, format = 'csv', search = '', filters = [], limit = 10000 }) => {
+    exportData: async ({ table, format = 'csv', search = '', filters = [], columns = [], limit = 10000, offset = 0 }) => {
         try {
             const response = await apiFetch({
                 path: `/${API_NAMESPACE}/export`,
@@ -68,7 +68,9 @@ export const flydbApi = {
                     format,
                     search,
                     filters,
+                    columns,
                     limit,
+                    offset,
                 },
             });
 
@@ -100,6 +102,23 @@ export const flydbApi = {
             return response;
         } catch (error) {
             console.error('Error fetching relationships:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Get all table relationships (counts)
+     */
+    getAllRelationships: async () => {
+        try {
+            const response = await apiFetch({
+                path: `/${API_NAMESPACE}/relationships/all`,
+                method: 'GET',
+            });
+
+            return response;
+        } catch (error) {
+            console.error('Error fetching all relationships:', error);
             throw error;
         }
     },

@@ -17,6 +17,34 @@
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
+    position: relative;
+
+    .flydb-panel-resize-handle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        cursor: ew-resize;
+        z-index: 10;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 40px;
+            background: #dcdcde;
+            border-radius: 1px;
+            transition: background 0.2s ease;
+        }
+
+        &:hover::before {
+            background: #667eea;
+        }
+    }
 
     .flydb-panel-header {
         display: flex;
@@ -30,8 +58,78 @@
             font-size: 16px;
         }
 
+        .flydb-panel-header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
         .flydb-panel-close {
             padding: 5px;
+        }
+
+        .flydb-presets-toggle {
+            font-size: 13px;
+        }
+    }
+
+    .flydb-presets-dropdown {
+        background: #f9fafb;
+        border-bottom: 1px solid #dcdcde;
+        padding: 12px 20px;
+        max-height: 300px;
+        overflow-y: auto;
+
+        .flydb-presets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flydb-preset-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #dcdcde;
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: all 0.15s ease;
+
+            &:hover {
+                border-color: #667eea;
+                box-shadow: 0 0 0 1px #667eea;
+            }
+
+            .flydb-preset-name {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                background: none;
+                border: none;
+                padding: 0;
+                text-align: left;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                color: #1e293b;
+
+                &:hover {
+                    color: #667eea;
+                }
+
+                .flydb-preset-count {
+                    font-size: 12px;
+                    font-weight: 400;
+                    color: #64748b;
+                }
+            }
+
+            .flydb-preset-delete {
+                flex-shrink: 0;
+                padding: 4px;
+            }
         }
     }
 
@@ -39,6 +137,16 @@
         flex: 1;
         overflow-y: auto;
         padding: 20px;
+
+        .flydb-panel-description {
+            margin: 0 0 20px 0;
+            padding: 12px;
+            background: #f6f8fa;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #57606a;
+            border-left: 3px solid #667eea;
+        }
 
         .flydb-no-filters {
             text-align: center;
@@ -91,6 +199,76 @@
                     flex: 2;
                 }
 
+                .flydb-date-filter {
+                    flex: 2;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+
+                    .flydb-date-preset {
+                        width: 100%;
+                    }
+
+                    .flydb-date-range {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        .flydb-date-start,
+                        .flydb-date-end {
+                            flex: 1;
+                        }
+
+                        .flydb-date-separator {
+                            color: #646970;
+                            font-size: 13px;
+                            white-space: nowrap;
+                        }
+                    }
+                }
+
+                .flydb-numeric-filter {
+                    flex: 2;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+
+                    .flydb-range-toggle {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        cursor: pointer;
+                        user-select: none;
+                        font-size: 13px;
+                        color: #646970;
+
+                        input[type="checkbox"] {
+                            cursor: pointer;
+                        }
+
+                        span {
+                            cursor: pointer;
+                        }
+                    }
+
+                    .flydb-numeric-range {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+
+                        .flydb-numeric-min,
+                        .flydb-numeric-max {
+                            flex: 1;
+                        }
+
+                        .flydb-numeric-separator {
+                            color: #646970;
+                            font-size: 13px;
+                            white-space: nowrap;
+                        }
+                    }
+                }
+
                 .flydb-remove-filter {
                     flex-shrink: 0;
                 }
@@ -103,9 +281,22 @@
     }
 
     .flydb-panel-footer {
-        padding: 20px 0;
+        padding: 20px 0px;
         border-top: 1px solid #dcdcde;
         display: flex;
         gap: 10px;
+    }
+}
+
+.flydb-save-preset-modal {
+    .components-modal__content {
+        padding: 20px;
+    }
+
+    .flydb-modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        justify-content: flex-end;
     }
 }

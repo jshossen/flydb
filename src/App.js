@@ -2,11 +2,16 @@ import { useState, useEffect } from '@wordpress/element';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import TablesPage from './pages/TablesPage';
 import TableViewerPage from './pages/TableViewerPage';
+import QueryBuilderPage from './pages/QueryBuilderPage';
 
 const App = () => {
     const [isLoading, setIsLoading] = useState(true);
+    const [defaultRoute, setDefaultRoute] = useState('/');
 
     useEffect(() => {
+        if (window.flydbConfig && window.flydbConfig.defaultRoute) {
+            setDefaultRoute(`/${window.flydbConfig.defaultRoute}`);
+        }
         setIsLoading(false);
     }, []);
 
@@ -22,8 +27,9 @@ const App = () => {
         <div className="flydb-app">
             <Router>
                 <Routes>
-                    <Route path="/" element={<TablesPage />} />
+                    <Route path="/" element={defaultRoute === '/' ? <TablesPage /> : <Navigate to={defaultRoute} replace />} />
                     <Route path="/table/:tableName" element={<TableViewerPage />} />
+                    <Route path="/query-builder" element={<QueryBuilderPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </Router>

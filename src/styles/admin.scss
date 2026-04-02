@@ -12,12 +12,15 @@
 @import 'components/data-table';
 @import 'components/pagination';
 @import 'components/filter-panel';
+@import 'components/relationship-panel';
 @import 'components/export-dropdown';
 @import 'components/form-controls';
+@import 'components/keyboard-shortcuts';
 
 // Pages
 @import 'pages/tables';
 @import 'pages/table-viewer';
+@import 'pages/query-builder';
 
 // Responsive
 @import 'responsive/responsive';

@@ -1,14 +1,38 @@
-import { useState } from '@wordpress/element';
+import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Spinner, Card, CardBody } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
 import { FormInput, FormButton } from './FormControls';
+import flydbApi from '../api/flydbApi';
+import DataTable from './DataTable';
 
 const TableList = ({ tables = [], isLoading = false }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortColumn, setSortColumn] = useState('name');
     const [sortOrder, setSortOrder] = useState('ASC');
+    const [relationships, setRelationships] = useState({});
+    const [loadingRelationships, setLoadingRelationships] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (tables.length > 0) {
+            loadRelationships();
+        }
+    }, [tables]);
+
+    const loadRelationships = async () => {
+        setLoadingRelationships(true);
+        try {
+            const response = await flydbApi.getAllRelationships();
+            if (response.success) {
+                setRelationships(response.relationships);
+            }
+        } catch (error) {
+            console.error('Failed to load relationships', error);
+        } finally {
+            setLoadingRelationships(false);
+        }
+    };
 
     const handleSort = (column) => {
         if (sortColumn === column) {
@@ -39,9 +63,98 @@ const TableList = ({ tables = [], isLoading = false }) => {
         }
     });
 
-    const handleTableClick = (tableName) => {
+    const handleTableClick = useCallback((tableName) => {
         navigate(`/table/${tableName}`);
-    };
+    }, [navigate]);
+
+    const columns = useMemo(() => [
+        {
+            name: 'name',
+            label: __('Table Name', 'flydb'),
+            headerStyle: { minWidth: '240px' },
+            renderCell: (row) => {
+                const tableRelationships = relationships[row.name];
+                return (
+                    <div className="flydb-table-name-wrapper">
+                        <strong>
+                            <a
+                                href={`#/table/${row.name}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleTableClick(row.name);
+                                }}
+                            >
+                                {row.name}
+                            </a>
+                        </strong>
+                        {tableRelationships && tableRelationships.count > 0 && (
+                            <div className="flydb-relationship-badges">
+                                {tableRelationships.belongs_to > 0 && (
+                                    <span
+                                        className="flydb-badge flydb-badge-belongs-to"
+                                        title={__('Belongs to relationships', 'flydb')}
+                                    >
+                                        ↑ {tableRelationships.belongs_to}
+                                    </span>
+                                )}
+                                {tableRelationships.has_many > 0 && (
+                                    <span
+                                        className="flydb-badge flydb-badge-has-many"
+                                        title={__('Has many relationships', 'flydb')}
+                                    >
+                                        ↓ {tableRelationships.has_many}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            }
+        },
+        {
+            name: 'engine',
+            label: __('Engine', 'flydb')
+        },
+        {
+            name: 'rows',
+            label: __('Rows', 'flydb'),
+            align: 'right',
+            isNumeric: true,
+            renderCell: (row) => row.rows?.toLocaleString() || '0'
+        },
+        {
+            name: 'size',
+            label: __('Size', 'flydb')
+        },
+        {
+            name: 'collation',
+            label: __('Collation', 'flydb')
+        },
+        {
+            name: 'created',
+            label: __('Created', 'flydb')
+        },
+        {
+            name: 'updated',
+            label: __('Updated', 'flydb')
+        },
+        {
+            name: 'actions',
+            label: __('Actions', 'flydb'),
+            isSortable: false,
+            disableReorder: true,
+            disableResize: true,
+            renderCell: (row) => (
+                <FormButton
+                    variant="secondary"
+                    size="small"
+                    onClick={() => handleTableClick(row.name)}
+                >
+                    {__('View', 'flydb')}
+                </FormButton>
+            )
+        }
+    ], [handleTableClick, relationships]);
 
     if (isLoading) {
         return (
@@ -72,86 +185,16 @@ const TableList = ({ tables = [], isLoading = false }) => {
 
             <Card className="flydb-card">
                 <CardBody className="flydb-table-card-body">
-                    <table className="wp-list-table widefat fixed striped flydb-tables-table">
-                <thead>
-                    <tr>
-                        <th
-                            onClick={() => handleSort('name')}
-                            className={`sortable ${sortColumn === 'name' ? 'sorted' : ''}`}
-                        >
-                            {__('Table Name', 'flydb')}
-                            {sortColumn === 'name' && (
-                                <span className="sort-indicator">{sortOrder === 'ASC' ? ' ▲' : ' ▼'}</span>
-                            )}
-                        </th>
-                        <th
-                            onClick={() => handleSort('engine')}
-                            className={`sortable ${sortColumn === 'engine' ? 'sorted' : ''}`}
-                        >
-                            {__('Engine', 'flydb')}
-                            {sortColumn === 'engine' && (
-                                <span className="sort-indicator">{sortOrder === 'ASC' ? ' ▲' : ' ▼'}</span>
-                            )}
-                        </th>
-                        <th
-                            onClick={() => handleSort('rows')}
-                            className={`sortable num ${sortColumn === 'rows' ? 'sorted' : ''}`}
-                        >
-                            {__('Rows', 'flydb')}
-                            {sortColumn === 'rows' && (
-                                <span className="sort-indicator">{sortOrder === 'ASC' ? ' ▲' : ' ▼'}</span>
-                            )}
-                        </th>
-                        <th
-                            onClick={() => handleSort('size')}
-                            className={`sortable ${sortColumn === 'size' ? 'sorted' : ''}`}
-                        >
-                            {__('Size', 'flydb')}
-                            {sortColumn === 'size' && (
-                                <span className="sort-indicator">{sortOrder === 'ASC' ? ' ▲' : ' ▼'}</span>
-                            )}
-                        </th>
-                        <th>{__('Collation', 'flydb')}</th>
-                        <th>{__('Created', 'flydb')}</th>
-                        <th>{__('Updated', 'flydb')}</th>
-                        <th>{__('Actions', 'flydb')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {sortedTables.map((table) => (
-                        <tr key={table.name}>
-                            <td className="table-name">
-                                <strong>
-                                    <a
-                                        href={`#/table/${table.name}`}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleTableClick(table.name);
-                                        }}
-                                    >
-                                        {table.name}
-                                    </a>
-                                </strong>
-                            </td>
-                            <td>{table.engine || '-'}</td>
-                            <td className="num">{table.rows?.toLocaleString() || '0'}</td>
-                            <td>{table.size || '-'}</td>
-                            <td>{table.collation || '-'}</td>
-                            <td>{table.created || '-'}</td>
-                            <td>{table.updated || '-'}</td>
-                            <td>
-                                <FormButton
-                                    variant="secondary"
-                                    size="small"
-                                    onClick={() => handleTableClick(table.name)}
-                                >
-                                    {__('View', 'flydb')}
-                                </FormButton>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-                    </table>
+                    <DataTable
+                        columns={columns}
+                        rows={sortedTables}
+                        isLoading={loadingRelationships && tables.length === 0}
+                        onSort={handleSort}
+                        sortColumn={sortColumn}
+                        sortOrder={sortOrder}
+                        highlightQuery={searchQuery}
+                        tableName="__flydb_tables_overview"
+                    />
                 </CardBody>
             </Card>
 

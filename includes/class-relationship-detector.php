@@ -42,6 +42,25 @@ class Relationship_Detector {
             'related_data' => $related_data,
         ));
     }
+
+    public function get_all_relationships($request) {
+        $all_tables = $this->get_all_table_names();
+        $relationships_map = array();
+        
+        foreach ($all_tables as $table) {
+            $relationships = $this->detect_table_relationships($table);
+            $relationships_map[$table] = array(
+                'count' => count($relationships),
+                'belongs_to' => count(array_filter($relationships, function($r) { return $r['type'] === 'belongs_to'; })),
+                'has_many' => count(array_filter($relationships, function($r) { return $r['type'] === 'has_many'; })),
+            );
+        }
+        
+        return rest_ensure_response(array(
+            'success' => true,
+            'relationships' => $relationships_map,
+        ));
+    }
     
     public function detect_table_relationships($table) {
         $relationships = array();

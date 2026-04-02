@@ -10,7 +10,8 @@
     "lint:css": "wp-scripts lint-style",
     "lint:js": "wp-scripts lint-js",
     "packages-update": "wp-scripts packages-update",
-    "package": "node scripts/build.js"
+    "package": "node scripts/build.js",
+    "release": "bash scripts/release.sh"
   },
   "keywords": [
     "wordpress",
