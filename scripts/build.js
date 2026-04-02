@@ -37,7 +37,8 @@ const FILE_EXCLUDES = new Set([
   '.babelrc',
   'admin-old.scss',
   'plan.md',
-  'BUILD.md'
+  'BUILD.md',
+  'current-task-outline.md'
 ]);
 
 const DEV_FILE_REMOVALS = [

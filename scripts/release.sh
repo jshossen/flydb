@@ -69,13 +69,13 @@ if [[ $SKIP_DEPLOY -eq 0 ]]; then
   SVN_AUTH_ARGS=(--username "$SVN_USERNAME" --password "$SVN_PASSWORD" --no-auth-cache)
 fi
 
-BUILD_DIR="$ROOT_DIR/build"
-PACKAGE_DIR="$BUILD_DIR/$PLUGIN_SLUG"
+DIST_DIR="$ROOT_DIR/dist"
+PACKAGE_DIR="$DIST_DIR/$PLUGIN_SLUG"
 SVN_DIR="$RELEASE_DIR/svn"
 ASSETS_DIR="$ROOT_DIR/.wordpress-org/assets"
 PLUGIN_VERSION=$(grep -oE "define\(\s*'FLYDB_VERSION'\s*,\s*'[^']+'" "$ROOT_DIR/flydb.php" | sed "s/.*'\([^']*\)'/\1/")
 VERSION="$PLUGIN_VERSION"
-ZIP_PATH="$BUILD_DIR/${PLUGIN_SLUG}-${VERSION}.zip"
+ZIP_PATH="$DIST_DIR/${PLUGIN_SLUG}-${VERSION}.zip"
 
 echo "${LOG_PREFIX} preparing release for v${VERSION}"
 
