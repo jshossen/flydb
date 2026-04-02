@@ -20,6 +20,14 @@ class Query_Builder_Controller {
             },
         ));
 
+        register_rest_route('flydb/v1', '/query-builder/export', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'export_query'),
+            'permission_callback' => function() {
+                return current_user_can('manage_options');
+            },
+        ));
+
         register_rest_route('flydb/v1', '/query-builder/presets', array(
             array(
                 'methods' => 'GET',
@@ -75,8 +83,9 @@ class Query_Builder_Controller {
             $limit = 1000;
         }
         
-        // Execute query
+        // Execute query - SQL is validated by is_safe_query() above
         try {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL is validated for SELECT only
             $results = $wpdb->get_results($sql, ARRAY_A);
             
             if ($wpdb->last_error) {
@@ -116,13 +125,14 @@ class Query_Builder_Controller {
     
     private function is_safe_query($sql) {
         $sql = trim($sql);
+        $sql_upper = strtoupper($sql);
         
         // Must start with SELECT
-        if (stripos($sql, 'SELECT') !== 0) {
+        if (strpos($sql_upper, 'SELECT') !== 0) {
             return false;
         }
         
-        // Check for dangerous keywords
+        // Check for dangerous keywords with word boundaries
         $dangerous_keywords = array(
             'INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE', 'ALTER',
             'TRUNCATE', 'REPLACE', 'RENAME', 'GRANT', 'REVOKE',
@@ -130,7 +140,8 @@ class Query_Builder_Controller {
         );
         
         foreach ($dangerous_keywords as $keyword) {
-            if (stripos($sql, $keyword) !== false) {
+            // Use word boundary regex to avoid matching keywords within column names
+            if (preg_match('/\b' . $keyword . '\b/i', $sql)) {
                 return false;
             }
         }
@@ -218,5 +229,84 @@ class Query_Builder_Controller {
             'success' => true,
             'message' => __('Preset deleted successfully', 'flydb'),
         ));
+    }
+
+    public function export_query($request) {
+        global $wpdb;
+        
+        $sql = $request->get_param('sql');
+        $format = sanitize_text_field($request->get_param('format')) ?: 'csv';
+        
+        if (empty($sql)) {
+            wp_die(esc_html__('SQL query is required', 'flydb'), 400);
+        }
+        
+        // Validate SQL is safe
+        if (!$this->is_safe_query($sql)) {
+            wp_die(esc_html__('Only SELECT queries are allowed', 'flydb'), 403);
+        }
+        
+        // Remove LIMIT clause for export to get all results
+        $sql = preg_replace('/\s+LIMIT\s+\d+\s*$/i', '', trim($sql));
+        
+        // Execute query - SQL is validated by is_safe_query() above
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL is validated for SELECT only
+        $results = $wpdb->get_results($sql, ARRAY_A);
+        
+        if ($wpdb->last_error) {
+            wp_die(esc_html($wpdb->last_error), 500);
+        }
+        
+        if (empty($results)) {
+            wp_die(esc_html__('No data to export', 'flydb'), 400);
+        }
+        
+        // Generate filename
+        $filename = 'query_export_' . gmdate('Y-m-d_H-i-s');
+        
+        // Export based on format
+        switch ($format) {
+            case 'json':
+                $this->download_json($results, $filename);
+                break;
+            case 'csv':
+            default:
+                $this->download_csv($results, $filename);
+                break;
+        }
+        
+        exit;
+    }
+    
+    private function download_csv($rows, $filename) {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . sanitize_file_name($filename) . '.csv"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Direct output to browser
+        $output = fopen('php://output', 'w');
+        
+        // Add headers
+        if (!empty($rows)) {
+            fputcsv($output, array_keys($rows[0]));
+            
+            // Add rows
+            foreach ($rows as $row) {
+                fputcsv($output, $row);
+            }
+        }
+        
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Direct output to browser
+        fclose($output);
+    }
+    
+    private function download_json($rows, $filename) {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . sanitize_file_name($filename) . '.json"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        echo wp_json_encode($rows, JSON_PRETTY_PRINT);
     }
 }

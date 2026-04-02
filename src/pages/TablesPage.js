@@ -4,7 +4,6 @@ import TableList from '../components/TableList';
 import Hero from '../components/Hero';
 import StatGrid from '../components/StatGrid';
 import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
-import ChatPanel from '../components/ChatPanel';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 
@@ -105,7 +104,7 @@ const TablesPage = () => {
                 <div className="flydb-main-column">
                     <Hero
                         label={__('Database overview', 'flydb')}
-                        title={__('FlyDB Tables', 'flydb')}
+                        title={__('All Tables', 'flydb')}
                         meta={heroMeta}
                         description={__('Use the explorer to search, sort, and inspect every WordPress table with instant navigation into row-level data.', 'flydb')}
                     />
@@ -125,10 +124,6 @@ const TablesPage = () => {
                         onClose={() => setShowKeyboardHelp(false)}
                     />
                 </div>
-
-                <aside className="flydb-chat-column">
-                    <ChatPanel context={{ workspace: 'tables_page' }} />
-                </aside>
             </div>
         </div>
     );

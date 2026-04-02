@@ -23,10 +23,29 @@
         }
 
         .flydb-sidebar-description {
-            margin: 0 0 16px 0;
+            margin: 0 0 12px 0;
             font-size: 13px;
             color: #64748b;
             line-height: 1.5;
+        }
+
+        .flydb-table-search {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+            
+            &:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+            }
+
+            &::placeholder {
+                color: #94a3b8;
+            }
         }
 
         .flydb-tables-list {
@@ -113,20 +132,21 @@
 
         .flydb-query-controls {
             display: flex;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
             align-items: flex-end;
-            padding: 16px;
+            padding: 8px 10px;
             background: #f8fafc;
-            border-radius: 8px;
-            margin-bottom: 16px;
+            border-radius: 6px;
+            margin-bottom: 10px;
 
             .flydb-control-group {
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 4px;
 
                 label {
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 600;
                     color: #475569;
                     margin: 0;
@@ -135,11 +155,12 @@
                 input[type="number"],
                 input[type="text"],
                 select {
-                    padding: 6px 10px;
+                    padding: 5px 8px;
                     border: 1px solid #cbd5e1;
                     border-radius: 4px;
-                    font-size: 13px;
-                    min-width: 120px;
+                    font-size: 12px;
+                    min-width: 100px;
+                    height: 30px;
 
                     &:focus {
                         outline: none;
@@ -149,20 +170,23 @@
                 }
 
                 input[type="number"] {
-                    min-width: 80px;
+                    min-width: 70px;
                 }
             }
 
             .components-button {
-                margin-left: auto;
+                height: 30px;
+                padding: 0 10px;
+                font-size: 12px;
             }
 
             .flydb-preset-select {
-                padding: 6px 10px;
+                padding: 5px 8px;
                 border: 1px solid #cbd5e1;
                 border-radius: 4px;
-                font-size: 13px;
-                min-width: 180px;
+                font-size: 12px;
+                min-width: 130px;
+                height: 30px;
                 background-color: #ffffff;
                 cursor: pointer;
 
@@ -219,6 +243,11 @@
             border-radius: 8px;
             position: relative;
             overflow: auto;
+            transition: height 0.3s ease;
+
+            &.flydb-query-canvas-small {
+                height: 100px;
+            }
 
             .flydb-canvas-placeholder {
                 position: absolute;

@@ -27,6 +27,8 @@ const QueryBuilderPage = () => {
     const [presetName, setPresetName] = useState('');
     const [panelWidth, setPanelWidth] = useState(500);
     const [isResizing, setIsResizing] = useState(false);
+    const [tableSearch, setTableSearch] = useState('');
+    const [isCanvasExpanded, setIsCanvasExpanded] = useState(false);
 
     useEffect(() => {
         loadTables();
@@ -335,13 +337,8 @@ const QueryBuilderPage = () => {
         }
 
         const sql = generateSQL();
-        const exportData = {
-            sql: sql,
-            format: format,
-            limit: queryLimit
-        };
 
-        window.location.href = `${window.flydbConfig.restUrl}/export?${new URLSearchParams({
+        window.location.href = `${window.flydbConfig.restUrl}/query-builder/export?${new URLSearchParams({
             sql: sql,
             format: format,
             _wpnonce: window.flydbConfig.nonce
@@ -447,13 +444,6 @@ const QueryBuilderPage = () => {
                         `${canvasNodes.length} ${__('tables on canvas', 'flydb')}`
                     ]}
                 >
-                    <Button
-                        icon={arrowLeft}
-                        onClick={handleBackToTables}
-                        className="flydb-back-button"
-                    >
-                        {__('Back to Tables', 'flydb')}
-                    </Button>
                 </Hero>
 
                 {error && (
@@ -470,6 +460,13 @@ const QueryBuilderPage = () => {
                                 <p className="flydb-sidebar-description">
                                     {__('Drag tables onto the canvas to start building your query', 'flydb')}
                                 </p>
+                                <input
+                                    type="text"
+                                    className="flydb-table-search"
+                                    placeholder={__('Search tables...', 'flydb')}
+                                    value={tableSearch}
+                                    onChange={(e) => setTableSearch(e.target.value)}
+                                />
                                 {isLoading ? (
                                     <div className="flydb-loading-small">
                                         <div className="spinner is-active"></div>
@@ -482,7 +479,9 @@ const QueryBuilderPage = () => {
                                     </div>
                                 ) : (
                                     <div className="flydb-tables-list">
-                                        {tables.map((table) => (
+                                        {tables.filter(table => 
+                                            table.name.toLowerCase().includes(tableSearch.toLowerCase())
+                                        ).map((table) => (
                                             <div
                                                 key={table.name}
                                                 className="flydb-table-item"
@@ -493,7 +492,7 @@ const QueryBuilderPage = () => {
                                                 <div className="flydb-table-info">
                                                     <span className="flydb-table-name">{table.name}</span>
                                                     <span className="flydb-table-meta">
-                                                        {table.row_count?.toLocaleString() || 0} {__('rows', 'flydb')}
+                                                        {table.rows?.toLocaleString() || 0} {__('rows', 'flydb')}
                                                     </span>
                                                 </div>
                                             </div>
@@ -549,7 +548,7 @@ const QueryBuilderPage = () => {
                                         variant="secondary"
                                         onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
                                     >
-                                        {__('Advanced (WHERE, JOIN, GROUP BY)', 'flydb')}
+                                        {__('Advanced', 'flydb')}
                                     </Button>
                                     <Button
                                         variant="secondary"
@@ -884,7 +883,8 @@ const QueryBuilderPage = () => {
                                 </div>
 
                                 <div 
-                                    className="flydb-query-canvas"
+                                    className={`flydb-query-canvas ${queryResults && !isCanvasExpanded ? 'flydb-query-canvas-small' : ''}`}
+                                    onClick={() => queryResults && setIsCanvasExpanded(true)}
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                     onMouseMove={handleCanvasMouseMove}

@@ -14,7 +14,6 @@ class Plugin {
     private $table_viewer;
     private $exporter;
     private $relationship_detector;
-    private $chat_controller;
     private $query_builder_controller;
     
     public static function get_instance() {
@@ -35,7 +34,6 @@ class Plugin {
         require_once FLYDB_PLUGIN_DIR . 'includes/class-table-viewer.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-exporter.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-relationship-detector.php';
-        require_once FLYDB_PLUGIN_DIR . 'includes/class-chat-controller.php';
         require_once FLYDB_PLUGIN_DIR . 'includes/class-query-builder-controller.php';
         
         $this->admin = new Admin();
@@ -43,7 +41,6 @@ class Plugin {
         $this->table_viewer = new Table_Viewer();
         $this->exporter = new Exporter();
         $this->relationship_detector = new Relationship_Detector();
-        $this->chat_controller = new Chat_Controller( $this->table_viewer, $this->db_explorer, $this->relationship_detector );
         $this->query_builder_controller = new Query_Builder_Controller();
     }
     
@@ -82,28 +79,15 @@ class Plugin {
             'permission_callback' => array($this, 'check_permissions'),
         ));
 
-        \register_rest_route('flydb/v1', '/chat/config', array(
-            array(
-                'methods' => 'GET',
-                'callback' => array($this->chat_controller, 'get_config'),
-                'permission_callback' => array($this, 'check_permissions'),
-            ),
-            array(
-                'methods' => 'POST',
-                'callback' => array($this->chat_controller, 'save_config'),
-                'permission_callback' => array($this, 'check_permissions'),
-            ),
-        ));
-
-        \register_rest_route('flydb/v1', '/chat/query', array(
-            'methods' => 'POST',
-            'callback' => array($this->chat_controller, 'query'),
-            'permission_callback' => array($this, 'check_permissions'),
-        ));
-
         \register_rest_route('flydb/v1', '/query-builder/execute', array(
             'methods' => 'POST',
             'callback' => array($this->query_builder_controller, 'execute_query'),
+            'permission_callback' => array($this, 'check_permissions'),
+        ));
+
+        \register_rest_route('flydb/v1', '/query-builder/export', array(
+            'methods' => 'GET',
+            'callback' => array($this->query_builder_controller, 'export_query'),
             'permission_callback' => array($this, 'check_permissions'),
         ));
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from '@wordpress/el
 import { __ } from '@wordpress/i18n';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardBody, Notice, Dropdown, MenuGroup, MenuItem, CheckboxControl } from '@wordpress/components';
-import { arrowLeft, filter as filterIcon, postDate, people, commentContent } from '@wordpress/icons';
+import { arrowLeft, filter as filterIcon, postDate, people, list } from '@wordpress/icons';
 import DataTable from '../components/DataTable';
 import Pagination from '../components/Pagination';
 import FilterBuilder from '../components/FilterBuilder';
@@ -10,7 +10,6 @@ import RelationshipPanel from '../components/RelationshipPanel';
 import ExportButton from '../components/ExportButton';
 import KeyboardShortcutsModal from '../components/KeyboardShortcutsModal';
 import KeyboardShortcutsButton from '../components/KeyboardShortcutsButton';
-import ChatPanel from '../components/ChatPanel';
 import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import flydbApi from '../api/flydbApi';
 import Hero from '../components/Hero';
@@ -49,7 +48,6 @@ const TableViewerPage = () => {
     const [showRelationshipPanel, setShowRelationshipPanel] = useState(false);
     const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
     const [panelWidth, setPanelWidth] = useState(400);
-    const [showChatPanel, setShowChatPanel] = useState(false);
     const [showColumnPanel, setShowColumnPanel] = useState(false);
     const [visibleColumns, setVisibleColumns] = useState([]);
     const skipDebounceRef = useRef(false);
@@ -481,7 +479,7 @@ const TableViewerPage = () => {
                                     </Button>
                                     <Button
                                         variant="secondary"
-                                        icon={commentContent}
+                                        icon={list}
                                         onClick={() => setShowColumnPanel(!showColumnPanel)}
                                     >
                                         {__('Column blueprint', 'flydb')}
@@ -651,42 +649,6 @@ const TableViewerPage = () => {
                     />
                 </div>
             </div>
-            <Button
-                className="flydb-floating-chat-button"
-                icon={commentContent}
-                variant="primary"
-                onClick={() => setShowChatPanel(true)}
-            >
-                {__('AI Chat', 'flydb')}
-            </Button>
-
-            {showChatPanel && (
-                <div className="flydb-panel-overlay" onClick={() => setShowChatPanel(false)}>
-                    <div
-                        className="flydb-panel flydb-chat-panel-floating"
-                        style={{ width: `${panelWidth}px` }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div
-                            className="flydb-panel-resize-handle"
-                            onMouseDown={(e) => {
-                                e.preventDefault();
-                                isResizingRef.current = true;
-                                document.body.style.cursor = 'ew-resize';
-                                document.body.style.userSelect = 'none';
-                            }}
-                        />
-                        <ChatPanel
-                            context={{
-                                tableName,
-                                columnCount,
-                                filters,
-                                searchQuery,
-                            }}
-                        />
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

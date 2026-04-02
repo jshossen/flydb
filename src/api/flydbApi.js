@@ -122,59 +122,6 @@ export const flydbApi = {
             throw error;
         }
     },
-
-    /**
-     * Chat configuration (API key + model)
-     */
-    getChatConfig: async () => {
-        try {
-            const response = await apiFetch({
-                path: `/${API_NAMESPACE}/chat/config`,
-                method: 'GET',
-            });
-
-            return response;
-        } catch (error) {
-            console.error('Error fetching chat config:', error);
-            throw error;
-        }
-    },
-
-    saveChatConfig: async ({ apiKey, model }) => {
-        try {
-            const response = await apiFetch({
-                path: `/${API_NAMESPACE}/chat/config`,
-                method: 'POST',
-                data: {
-                    api_key: apiKey,
-                    model,
-                },
-            });
-
-            return response;
-        } catch (error) {
-            console.error('Error saving chat config:', error);
-            throw error;
-        }
-    },
-
-    chatQuery: async ({ prompt, context = {} }) => {
-        try {
-            const response = await apiFetch({
-                path: `/${API_NAMESPACE}/chat/query`,
-                method: 'POST',
-                data: {
-                    prompt,
-                    context,
-                },
-            });
-
-            return response;
-        } catch (error) {
-            console.error('Error running chat query:', error);
-            throw error;
-        }
-    },
 };
 
 export default flydbApi;

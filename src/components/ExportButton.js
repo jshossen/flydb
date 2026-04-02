@@ -260,7 +260,7 @@ const ExportButton = ({
                         <MenuGroup>
                             <div className="flydb-export-presets">
                                 <div className="flydb-export-presets-header">
-                                    <span>{__('Presets', 'flydb')}</span>
+                                    <span style={{ marginRight: 4 }}>{__('Presets', 'flydb')}</span>
                                     <Button
                                         variant="link"
                                         isSmall
