@@ -3,7 +3,7 @@
  * Plugin Name: FlyDB
  * Plugin URI: https://github.com/jshossen/flydb
  * Description: A powerful database explorer for WordPress that lets administrators browse tables, view relational data, filter results, paginate records, and export data easily.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Jakir Hossen
  * Author URI: https://github.com/jshossen
  * License: GPL v2 or later
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLYDB_VERSION', '1.0.0');
+define('FLYDB_VERSION', '1.0.1');
 define('FLYDB_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FLYDB_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLYDB_PLUGIN_FILE', __FILE__);
